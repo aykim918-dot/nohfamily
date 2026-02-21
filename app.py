@@ -209,6 +209,10 @@ def save_study_record(student, subject, score, total):
 # ============================================================
 #  AI 핵심 호출 함수
 # ============================================================
+def _fix_json_escapes(s: str) -> str:
+    """JSON 내 LaTeX 백슬래시 이스케이프 오류 수정"""
+    return re.sub(r'\\(?!["\\/bfnrtu0-9])', r'\\\\', s)
+
 def _call_gemini(prompt: str) -> dict | None:
     """Gemini API 호출 → JSON 반환"""
     genai.configure(api_key=api_key)
@@ -218,10 +222,10 @@ def _call_gemini(prompt: str) -> dict | None:
         raw = resp.text
         m = re.search(r"```json\s*(.*?)\s*```", raw, re.DOTALL)
         if m:
-            return json.loads(m.group(1))
+            return json.loads(_fix_json_escapes(m.group(1)))
         m = re.search(r"\{.*\}", raw, re.DOTALL)
         if m:
-            return json.loads(m.group())
+            return json.loads(_fix_json_escapes(m.group()))
         return None
     except Exception as e:
         st.error(f"AI 오류: {e}")
