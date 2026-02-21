@@ -129,6 +129,121 @@ BADGES = [
 ]
 
 # ============================================================
+#  NZ 수학 커리큘럼 맵 (NZC Year 4→6, Level 1→6)
+# ============================================================
+MATH_CURRICULUM = [
+    # ── Level 1: Year 4 기초 ──────────────────────────────────
+    {"id": "pt1", "level": 1, "strand": "패턴·대수",
+     "name_ko": "수 패턴 (덧·뺄셈)", "name_en": "Number patterns (+/−)",
+     "concepts": ["number_pattern", "sequence", "pattern", "number_sequence"]},
+    {"id": "wp1", "level": 1, "strand": "문장제",
+     "name_ko": "1단계 문장제",       "name_en": "1-step word problems",
+     "concepts": ["word_problem", "word_problem_1step", "one_step"]},
+    {"id": "fr1", "level": 1, "strand": "분수",
+     "name_ko": "단위 분수",           "name_en": "Unit fractions (½ ⅓ ¼)",
+     "concepts": ["unit_fraction", "fraction_basic", "fractions_of_set", "fraction_of_set",
+                  "simple_fractions", "fractions"]},
+    # ── Level 2: Year 4-5 ────────────────────────────────────
+    {"id": "wn1", "level": 2, "strand": "정수",
+     "name_ko": "두 자리 × 한 자리", "name_en": "2-digit × 1-digit",
+     "concepts": ["multiplication", "multiplication_2d1d", "two_digit_multiplication"]},
+    {"id": "wn2", "level": 2, "strand": "정수",
+     "name_ko": "나머지 없는 나눗셈", "name_en": "Division (no remainder)",
+     "concepts": ["division", "division_no_remainder", "simple_division"]},
+    {"id": "fr2", "level": 2, "strand": "분수",
+     "name_ko": "동치 분수",           "name_en": "Equivalent fractions",
+     "concepts": ["equivalent_fractions", "fraction_equivalent", "equivalence"]},
+    {"id": "fr3", "level": 2, "strand": "분수",
+     "name_ko": "같은 분모 덧·뺄셈",  "name_en": "Fractions +/− (same denom)",
+     "concepts": ["fraction_addition", "fraction_subtraction", "fraction_same_denom",
+                  "same_denominator"]},
+    {"id": "dc1", "level": 2, "strand": "소수",
+     "name_ko": "소수 첫째 자리",     "name_en": "Decimals to 1dp",
+     "concepts": ["decimal_1dp", "decimals", "decimal_addition", "decimal_subtraction",
+                  "tenths"]},
+    {"id": "pt2", "level": 2, "strand": "패턴·대수",
+     "name_ko": "빈칸 채우기",         "name_en": "Missing numbers",
+     "concepts": ["missing_number", "missing_numbers", "find_the_missing"]},
+    # ── Level 3: Year 5 ──────────────────────────────────────
+    {"id": "wn3", "level": 3, "strand": "정수",
+     "name_ko": "두 자리 × 두 자리", "name_en": "2-digit × 2-digit",
+     "concepts": ["multiplication_2d2d", "multi_digit_multiplication", "long_multiplication"]},
+    {"id": "wn4", "level": 3, "strand": "정수",
+     "name_ko": "나머지 있는 나눗셈", "name_en": "Division with remainder",
+     "concepts": ["division_remainder", "division_with_remainder", "remainder"]},
+    {"id": "fr4", "level": 3, "strand": "분수",
+     "name_ko": "분수 × 정수",         "name_en": "Fraction × whole number",
+     "concepts": ["fraction_multiply_whole", "fraction_whole_number", "fraction_times_whole"]},
+    {"id": "fr5", "level": 3, "strand": "분수",
+     "name_ko": "분수 크기 비교",      "name_en": "Comparing fractions",
+     "concepts": ["fraction_compare", "fraction_ordering", "comparing_fractions",
+                  "ordering_fractions"]},
+    {"id": "dc2", "level": 3, "strand": "소수",
+     "name_ko": "소수 둘째 자리",     "name_en": "Decimals to 2dp",
+     "concepts": ["decimal_2dp", "decimal_operations", "hundredths"]},
+    {"id": "pc1", "level": 3, "strand": "백분율",
+     "name_ko": "10%, 50% 계산",       "name_en": "10% and 50%",
+     "concepts": ["percentage_basic", "percentage_10", "percentage_50", "percentages",
+                  "percentage", "simple_percentage"]},
+    {"id": "pt3", "level": 3, "strand": "패턴·대수",
+     "name_ko": "인수 쌍",             "name_en": "Factor pairs",
+     "concepts": ["factor_pairs", "factors", "factor_pair"]},
+    {"id": "wp2", "level": 3, "strand": "문장제",
+     "name_ko": "2단계 문장제",        "name_en": "2-step word problems",
+     "concepts": ["word_problem_2step", "multi_step", "two_step", "multi_step_problem"]},
+    # ── Level 4: Year 5-6 ────────────────────────────────────
+    {"id": "fr6", "level": 4, "strand": "분수",
+     "name_ko": "다른 분모 덧·뺄셈",  "name_en": "Fractions +/− (diff denom)",
+     "concepts": ["fraction_different_denom", "fraction_unlike_denom",
+                  "unlike_denominators", "different_denominators"]},
+    {"id": "dc3", "level": 4, "strand": "소수",
+     "name_ko": "× ÷ 10, 100",        "name_en": "× and ÷ by 10/100",
+     "concepts": ["decimal_multiply_10", "decimal_divide_10", "multiply_by_10",
+                  "divide_by_100", "powers_of_ten"]},
+    {"id": "pc2", "level": 4, "strand": "백분율",
+     "name_ko": "25%, 75% 계산",       "name_en": "25% and 75%",
+     "concepts": ["percentage_25", "percentage_75", "percentage_of_quantity",
+                  "percentage_quantity"]},
+    {"id": "rt1", "level": 4, "strand": "비율",
+     "name_ko": "간단한 비",           "name_en": "Simple ratios",
+     "concepts": ["ratio", "ratio_basic", "simple_ratio"]},
+    {"id": "wp3", "level": 4, "strand": "문장제",
+     "name_ko": "3단계 문장제",        "name_en": "3-step word problems",
+     "concepts": ["word_problem_3step", "multi_step_complex", "three_step",
+                  "complex_word_problem"]},
+    # ── Level 5: Year 6 ──────────────────────────────────────
+    {"id": "fr7", "level": 5, "strand": "분수",
+     "name_ko": "대분수",              "name_en": "Mixed numbers",
+     "concepts": ["mixed_numbers", "improper_fractions", "mixed_number",
+                  "improper_to_mixed"]},
+    {"id": "fr8", "level": 5, "strand": "분수",
+     "name_ko": "분수 × 분수",         "name_en": "Fraction × fraction",
+     "concepts": ["fraction_multiply", "fraction_times_fraction",
+                  "fraction_multiplication"]},
+    {"id": "pc3", "level": 5, "strand": "백분율",
+     "name_ko": "임의 백분율 계산",    "name_en": "Any percentage of quantity",
+     "concepts": ["percentage_any", "percentage_any_quantity", "find_percentage"]},
+    {"id": "rt2", "level": 5, "strand": "비율",
+     "name_ko": "비 간단히·비 문장제", "name_en": "Ratio simplify & word problems",
+     "concepts": ["ratio_simplify", "ratio_word_problem", "ratio_proportion",
+                  "simplifying_ratios"]},
+    # ── Level 6: Year 6 심화 ─────────────────────────────────
+    {"id": "fr9", "level": 6, "strand": "분수",
+     "name_ko": "분수 나누기",         "name_en": "Fraction ÷ fraction",
+     "concepts": ["fraction_division", "fraction_divide", "dividing_fractions"]},
+    {"id": "pc4", "level": 6, "strand": "백분율",
+     "name_ko": "백분율 증가·감소",    "name_en": "Percentage increase/decrease",
+     "concepts": ["percentage_change", "percentage_increase", "percentage_decrease",
+                  "percentage_change"]},
+    {"id": "rt3", "level": 6, "strand": "비율",
+     "name_ko": "비례 관계",           "name_en": "Proportion",
+     "concepts": ["proportion", "direct_proportion", "ratio_proportion_advanced"]},
+    {"id": "dc4", "level": 6, "strand": "소수",
+     "name_ko": "소수 셋째 자리",     "name_en": "Decimals to 3dp",
+     "concepts": ["decimal_3dp", "decimal_thousandths", "thousandths"]},
+]
+
+# ============================================================
 #  Google Sheets 함수
 # ============================================================
 def _get_conn():
@@ -269,6 +384,81 @@ def _call_gemini_text(prompt: str) -> str:
         return ""
 
 # ============================================================
+#  수학 마스터리 추적 함수
+# ============================================================
+def get_topic_for_concept(concept: str) -> str | None:
+    """concept 문자열 → topic ID 반환 (fuzzy match)"""
+    c = concept.lower().replace("-", "_")
+    for topic in MATH_CURRICULUM:
+        if c in topic["concepts"]:
+            return topic["id"]
+    for topic in MATH_CURRICULUM:
+        for tag in topic["concepts"]:
+            if tag in c or c in tag:
+                return topic["id"]
+    return None
+
+def get_topic_mastery(student: str, topic_id: str) -> dict:
+    """topic 마스터리 데이터 반환 {attempts, correct, rate}"""
+    m = st.session_state.get("math_mastery", {}).get(student, {}).get(topic_id, {})
+    attempts = m.get("attempts", 0)
+    correct  = m.get("correct", 0)
+    return {"attempts": attempts, "correct": correct,
+            "rate": correct / attempts if attempts > 0 else -1.0}
+
+def is_topic_mastered(student: str, topic_id: str) -> bool:
+    """3회 이상 시도 + 75% 이상 정답률 = 마스터"""
+    m = get_topic_mastery(student, topic_id)
+    return m["attempts"] >= 3 and m["rate"] >= 0.75
+
+def update_math_mastery(student: str, results: list):
+    """퀴즈 결과(results)로 토픽별 마스터리 업데이트"""
+    if "math_mastery" not in st.session_state:
+        st.session_state.math_mastery = {s: {} for s in STUDENTS}
+    mastery = st.session_state.math_mastery.setdefault(student, {})
+    for r in results:
+        concept  = r["q"].get("concept", "")
+        topic_id = get_topic_for_concept(concept)
+        if topic_id:
+            entry = mastery.setdefault(topic_id, {"attempts": 0, "correct": 0})
+            entry["attempts"] += 1
+            if r["is_ok"]:
+                entry["correct"] += 1
+
+def get_math_learning_plan(student: str) -> dict:
+    """
+    현재 마스터리 기반 학습 계획 반환:
+      current_level, focus_topics, review_topics, stretch_topics
+    """
+    # 토픽별 마스터 여부 계산
+    topic_mastered = {t["id"]: is_topic_mastered(student, t["id"]) for t in MATH_CURRICULUM}
+
+    # 현재 레벨: 미완료 토픽이 있는 가장 낮은 레벨
+    current_level = 1
+    for lvl in range(1, 7):
+        topics_at = [t for t in MATH_CURRICULUM if t["level"] == lvl]
+        if not topics_at:
+            continue
+        if not all(topic_mastered[t["id"]] for t in topics_at):
+            current_level = lvl
+            break
+    else:
+        current_level = 6
+
+    focus_topics   = [t for t in MATH_CURRICULUM
+                      if t["level"] == current_level and not topic_mastered[t["id"]]]
+    review_topics  = [t for t in MATH_CURRICULUM
+                      if t["level"] < current_level and not topic_mastered[t["id"]]][:3]
+    stretch_topics = [t for t in MATH_CURRICULUM if t["level"] == current_level + 1][:2]
+
+    return {
+        "current_level":  current_level,
+        "focus_topics":   focus_topics,
+        "review_topics":  review_topics,
+        "stretch_topics": stretch_topics,
+    }
+
+# ============================================================
 #  AI 문제 생성 함수
 # ============================================================
 def generate_english_questions(student: str, difficulty: str, wrong_concepts: list) -> dict | None:
@@ -293,6 +483,15 @@ Vocabulary level: {diff_map[difficulty]}.
 TASK: Generate a JSON object with this EXACT structure:
 ```json
 {{
+  "grammar_focus": {{
+    "title": "오늘의 핵심 표현 (Korean, e.g. '비교급 표현 배우기')",
+    "point": "핵심 문법/표현 포인트 (Korean, 1-2 sentences, simple explanation for a 10-year-old)",
+    "examples": [
+      "Example sentence 1 (English) — 한국어 뜻",
+      "Example sentence 2 (English) — 한국어 뜻",
+      "Example sentence 3 (English) — 한국어 뜻"
+    ]
+  }},
   "passage_title": "Title here",
   "passage": "2-3 paragraph reading passage (150-200 words). Write the 5 key vocabulary words in ALL CAPS each time they appear.",
   "key_words": [
@@ -317,6 +516,12 @@ TASK: Generate a JSON object with this EXACT structure:
 }}
 ```
 
+GRAMMAR FOCUS RULES:
+- Choose ONE grammar point or expression pattern that naturally appears in the passage
+- Keep the Korean explanation very simple and friendly for a 10-year-old EAL student
+- Examples must be natural English sentences with Korean translations
+- This helps students notice the pattern before they read
+
 KEY WORDS RULES:
 - Choose exactly 5 important vocabulary words from the passage
 - These must be Tier 2 academic words (useful across subjects, not too rare)
@@ -339,55 +544,100 @@ RULES:
 """
     return _call_gemini(prompt)
 
-def generate_math_questions(student: str, difficulty: str, wrong_concepts: list) -> dict | None:
+def generate_math_questions(student: str, learning_plan: dict, wrong_concepts: list) -> dict | None:
     info = STUDENTS[student]
-    diff_map = {
-        "easy":   "NZC Level 3-4 (Year 5 above average): multi-digit multiplication (e.g. 24×15), division with remainders (e.g. 96÷8), fractions with different denominators, decimals to 2dp — single-digit multiplication is TOO EASY, do NOT include it",
-        "medium": "NZC Level 4 (Year 6): fraction multiply/divide, percentages of quantities (e.g. 35% of 80), ratio basics (e.g. 3:5), multi-step word problems, decimals to 3dp",
-        "hard":   "NZC Level 4+ (Year 6 extension/challenge): complex fraction operations with mixed numbers, percentage increase/decrease, ratio and proportion, challenging multi-step word problems requiring 3+ steps",
+    level = learning_plan["current_level"]
+    focus   = learning_plan["focus_topics"]
+    review  = learning_plan["review_topics"]
+    stretch = learning_plan["stretch_topics"]
+
+    level_desc = {
+        1: "NZC Level 3 / Year 4: number patterns, unit fractions, simple 1-step word problems — keep numbers very small (answers under 50)",
+        2: "NZC Level 3 / Year 4-5: 2-digit×1-digit, division without remainders, equivalent fractions, same-denominator fractions, decimals to 1dp",
+        3: "NZC Level 3-4 / Year 5: 2-digit×2-digit, division with remainders, fraction×whole, comparing fractions, decimals to 2dp, 10%/50%",
+        4: "NZC Level 4 / Year 5-6: fractions with different denominators, ×÷ by 10/100, 25%/75%, simple ratios, 3-step word problems",
+        5: "NZC Level 4 / Year 6: mixed numbers, fraction×fraction, any percentage, ratio simplify and word problems",
+        6: "NZC Level 4+ / Year 6 extension: fraction division, percentage increase/decrease, proportion, decimals to 3dp",
     }
+
+    def topics_str(lst):
+        return "; ".join(f"{t['name_en']} ({t['name_ko']})" for t in lst) if lst else "none"
+
     review_note = (
-        f"IMPORTANT: Include at least 3 questions that directly address these concepts "
-        f"the student previously struggled with: {', '.join(wrong_concepts[:4])}. "
+        f"IMPORTANT: Also include 2 questions reviewing these previously weak concepts: "
+        f"{', '.join(wrong_concepts[:3])}.\n"
         if wrong_concepts else ""
     )
+
+    # Question counts
+    n_focus   = max(12, 20 - len(review) * 2 - (2 if stretch else 0))
+    n_review  = min(4, len(review) * 2)
+    n_stretch = 2 if stretch else 0
+    # Ensure total = 20
+    n_focus = 20 - n_review - n_stretch
+
     prompt = f"""
-You are creating a Singapore Math-style quiz for a New Zealand Year 5 student (above average ability) named {student}.
+You are a warm, encouraging math teacher creating a quiz for a New Zealand Year 4-6 student named {student}.
 Learning style: {info['style']} — frame word problems {info['math_style']}.
-Curriculum level: {diff_map[difficulty]}.
+Overall curriculum level: {level_desc.get(level, level_desc[2])}.
 {review_note}
+
+TODAY'S LEARNING TARGETS:
+  • PRIMARY TOPICS (main focus): {topics_str(focus)}
+  • REVIEW TOPICS (build confidence): {topics_str(review)}
+  • STRETCH TOPICS (challenge preview): {topics_str(stretch)}
 
 TASK: Generate a JSON object with this EXACT structure:
 ```json
 {{
+  "topic_title": "오늘의 주제 (Korean, e.g. '두 자리 × 한 자리 곱셈')",
+  "topic_intro": "오늘 배울 내용 한 줄 소개 (Korean, friendly tone for a 10-year-old)",
+  "worked_examples": [
+    {{
+      "title": "예제 제목 (Korean, e.g. '기본 곱셈')",
+      "problem": "예제 문제 (e.g. '34 × 3 = ?')",
+      "steps": [
+        "① 일의 자리: 4 × 3 = 12 (받아올림 1)",
+        "② 십의 자리: 3 × 3 = 9, 받아올림 더하면 10",
+        "③ 답: 102"
+      ],
+      "answer": "102",
+      "tip": "핵심 팁 (optional, Korean)"
+    }}
+  ],
   "questions": [
     {{
       "id": 1,
-      "topic": "fractions",
-      "question": "Full word problem text here.",
+      "topic": "multiplication",
+      "question": "Full question text.",
       "options": ["A) ...", "B) ...", "C) ...", "D) ..."],
       "correct": "A",
-      "concept": "fraction_addition",
-      "solution": "Step 1: [describe step]. Step 2: [formula]. Step 3: Answer = [value]",
+      "concept": "multiplication_2d1d",
+      "solution": "Step 1: ... Step 2: ... Answer = ...",
       "explanation": "One sentence why this is correct."
     }}
   ]
 }}
 ```
 
-QUESTION DISTRIBUTION (exactly 20 questions, all multiple choice A/B/C/D):
-- Questions 1-5: FRACTIONS (equivalent fractions, add/subtract with different denominators, multiply fraction by whole number, simple mixed numbers)
-- Questions 6-10: DECIMALS & PERCENTAGES (decimals to 2dp operations, 10%/25%/50%/75% of a quantity, fraction↔decimal conversions)
-- Questions 11-15: MULTIPLICATION, DIVISION & PATTERNS (multi-digit multiplication e.g. 23×14, division with remainders, missing number patterns e.g. ___ × 6 = 144, factor pairs)
-- Questions 16-20: MULTI-STEP WORD PROBLEMS (Singapore bar model style, NZ contexts: rugby, farms, beaches, kiwi birds, Maori culture — requires 2-3 steps to solve)
+WORKED EXAMPLES RULES:
+- Create 2-3 worked examples that directly match the PRIMARY TOPICS
+- Steps must be clear, numbered ①②③, written in Korean
+- Show the thinking process a child should follow
+- Include a visual tip where helpful (e.g. "피자 4조각 중 생각해봐요!")
+
+QUESTION DISTRIBUTION (exactly 20 questions, all 4-option multiple choice A/B/C/D):
+- Questions 1-{n_focus}: PRIMARY TOPICS — pitch at current level, mix of pure calculation + short word problems (NZ contexts)
+- Questions {n_focus+1}-{n_focus+n_review}: REVIEW TOPICS — slightly easier to build confidence
+- Questions {n_focus+n_review+1}-20: STRETCH TOPICS — one level harder as a preview challenge
 
 RULES:
-- NEVER include single-digit × single-digit questions — these are too easy
-- Questions must be genuinely challenging for an above-average Year 5 student
-- NO algebra with letter variables like x
-- Wrong options must reflect real student errors (wrong operation, arithmetic slip, unit confusion)
-- solution field: write ALL arithmetic using LaTeX notation e.g. $\\frac{{3}}{{4}} + \\frac{{1}}{{4}} = \\frac{{4}}{{4}} = 1$
-- Use New Zealand real-world contexts in word problems
+- Questions at current level should be achievable: aim for ~70% success for a student new to the topic
+- Concept field: use snake_case tags from this list: {', '.join(set(c for t in MATH_CURRICULUM for c in t['concepts'][:2]))}
+- Wrong options must reflect real mistakes (not random) — e.g. wrong operation, arithmetic slip
+- NO algebra with letter variables
+- solution field: use LaTeX for all maths e.g. $\\frac{{3}}{{4}} + \\frac{{1}}{{4}} = 1$
+- Use NZ contexts in word problems (rugby, farms, beaches, kiwi birds, Maori culture)
 - All content appropriate for 9-11 year olds
 """
     return _call_gemini(prompt)
@@ -595,8 +845,38 @@ def run_english_quiz(student: str):
     submitted = st.session_state[done_key]
     passage   = data.get("passage", "")
 
-    # ── 핵심 단어 5개 코너 ──
+    # ── 오늘의 핵심 표현 (Grammar Focus) ──
     st.markdown("---")
+    grammar_focus = data.get("grammar_focus", {})
+    if grammar_focus:
+        gf_title = grammar_focus.get("title", "오늘의 핵심 표현")
+        gf_point = grammar_focus.get("point", "")
+        gf_examples = grammar_focus.get("examples", [])
+        st.markdown(
+            f"""<div style="background:#FFF9C4;border-left:5px solid #F59E0B;
+            border-radius:10px;padding:16px 20px;margin-bottom:8px">
+            <div style="font-size:1.05em;font-weight:800;color:#92400E">
+              💡 {gf_title}
+            </div>
+            <div style="font-size:0.92em;color:#78350F;margin-top:6px;line-height:1.7">
+              {gf_point}
+            </div>
+            </div>""",
+            unsafe_allow_html=True,
+        )
+        if gf_examples:
+            ex_html = "".join(
+                f"""<div style="padding:5px 0;font-size:0.88em;color:#374151">
+                📝 {ex}</div>"""
+                for ex in gf_examples
+            )
+            st.markdown(
+                f"""<div style="background:white;border:1px solid #FDE68A;
+                border-radius:8px;padding:10px 16px;margin-bottom:6px">{ex_html}</div>""",
+                unsafe_allow_html=True,
+            )
+
+    # ── 핵심 단어 5개 코너 ──
     key_words = data.get("key_words", [])
     if key_words:
         st.markdown("### 📚 오늘의 핵심 단어 5개")
@@ -679,12 +959,38 @@ def run_english_quiz(student: str):
 # ============================================================
 def run_math_quiz(student: str):
     info = STUDENTS[student]
-    st.markdown("## 🔢 수학 퀴즈 — 싱가포르 매쓰 스타일")
-    st.caption(f"{info['emoji']} {student} · {info['style_desc']} 스타일 맞춤 문제")
+    st.markdown("## 🔢 수학 퀴즈")
+    st.caption(f"{info['emoji']} {student} · {info['style_desc']} 스타일 맞춤 학습")
 
-    difficulty = calc_difficulty(student, "math")
-    diff_labels = {"easy": "⭐ 기본 (Year 5)", "medium": "⭐⭐ 보통 (Year 5-6)", "hard": "⭐⭐⭐ 심화 (Year 6)"}
-    st.info(f"현재 난이도: **{diff_labels[difficulty]}** (정답률에 따라 자동 조정됩니다)")
+    # ── 학습 계획 계산 ──
+    learning_plan = get_math_learning_plan(student)
+    level = learning_plan["current_level"]
+    level_labels = {
+        1: ("⭐", "레벨 1 — Year 4 기초"),
+        2: ("⭐⭐", "레벨 2 — Year 4-5"),
+        3: ("⭐⭐⭐", "레벨 3 — Year 5"),
+        4: ("⭐⭐⭐⭐", "레벨 4 — Year 5-6"),
+        5: ("⭐⭐⭐⭐⭐", "레벨 5 — Year 6"),
+        6: ("🏆", "레벨 6 — Year 6 심화"),
+    }
+    stars, level_name = level_labels.get(level, ("⭐", "레벨 1"))
+
+    # 학습 단계 배너
+    focus_names = " · ".join(t["name_ko"] for t in learning_plan["focus_topics"]) or "복습"
+    st.markdown(
+        f"""<div style="background:linear-gradient(135deg,{info['color']}30,{info['color']}10);
+        border:2px solid {info['color']}60; border-radius:14px; padding:16px 20px; margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:1.6em">{stars}</span>
+          <div>
+            <div style="font-weight:800;font-size:1.05em;color:{info['color']}">{level_name}</div>
+            <div style="font-size:0.88em;color:#555;margin-top:2px">
+              🎯 오늘의 집중 주제: <b>{focus_names}</b>
+            </div>
+          </div>
+        </div></div>""",
+        unsafe_allow_html=True,
+    )
 
     wrong_concepts = get_wrong_concepts(student, "math")
     if wrong_concepts:
@@ -694,10 +1000,11 @@ def run_math_quiz(student: str):
     ans_key   = f"math_ans_{student}"
     done_key  = f"math_done_{student}"
     expl_key  = f"explanations_math_{student}"
+    plan_key  = f"math_plan_{student}"
 
     if data_key not in st.session_state:
-        with st.spinner("🤖 AI가 수학 문제를 만들고 있어요... (약 30초 소요)"):
-            data = generate_math_questions(student, difficulty, wrong_concepts)
+        with st.spinner("🤖 AI가 오늘의 학습 내용과 문제를 준비하고 있어요... (약 30초 소요)"):
+            data = generate_math_questions(student, learning_plan, wrong_concepts)
         if not data or "questions" not in data:
             st.error("문제 생성에 실패했습니다. API 키와 인터넷 연결을 확인해주세요.")
             return
@@ -705,6 +1012,7 @@ def run_math_quiz(student: str):
         st.session_state[ans_key]   = {}
         st.session_state[done_key]  = False
         st.session_state[expl_key]  = {}
+        st.session_state[plan_key]  = learning_plan
 
     data      = st.session_state[data_key]
     answers   = st.session_state[ans_key]
@@ -716,19 +1024,69 @@ def run_math_quiz(student: str):
         return
 
     if not submitted:
-        st.markdown(f"> 💡 **{student}의 수학 팁**: {info['math_tip']}")
-        topic_sections = [
-            ("🎂 분수",          questions[0:5]),
-            ("💯 소수 & 백분율",  questions[5:10]),
-            ("🔣 기초 대수",      questions[10:15]),
-            ("📖 문장제 문제",    questions[15:20]),
-        ]
+        # ── 📖 오늘의 학습 — 풀이 예제 ──
+        worked_examples = data.get("worked_examples", [])
+        topic_title = data.get("topic_title", focus_names)
+        topic_intro = data.get("topic_intro", "")
+
+        st.markdown("---")
+        st.markdown(
+            f"""<div style="background:#FFF9C4;border-left:5px solid #F59E0B;
+            border-radius:10px;padding:16px 20px;margin-bottom:6px">
+            <div style="font-size:1.1em;font-weight:800;color:#92400E">
+              📖 오늘의 학습 — {topic_title}
+            </div>
+            <div style="font-size:0.9em;color:#78350F;margin-top:4px">{topic_intro}</div>
+            </div>""",
+            unsafe_allow_html=True,
+        )
+
+        if worked_examples:
+            ex_cols = st.columns(min(len(worked_examples), 2))
+            for i, ex in enumerate(worked_examples):
+                with ex_cols[i % len(ex_cols)]:
+                    st.markdown(
+                        f"""<div style="background:white;border:2px solid {info['color']}50;
+                        border-radius:12px;padding:16px;height:100%">
+                        <div style="font-weight:700;color:{info['color']};margin-bottom:8px">
+                          🧮 {ex.get('title', f'예제 {i+1}')}
+                        </div>
+                        <div style="background:#F8FAFC;border-radius:8px;padding:10px;
+                        font-weight:600;font-size:0.95em;margin-bottom:10px">
+                          ❓ {ex.get('problem', '')}
+                        </div>""",
+                        unsafe_allow_html=True,
+                    )
+                    for step in ex.get("steps", []):
+                        st.markdown(f"&nbsp;&nbsp;{step}")
+                    ans_txt = ex.get("answer", "")
+                    tip_txt = ex.get("tip", "")
+                    st.markdown(
+                        f"""<div style="background:#DCFCE7;border-radius:8px;padding:8px 12px;
+                        margin-top:8px;font-weight:700;color:#15803D">
+                        ✅ 정답: {ans_txt}
+                        </div>
+                        {"<div style='font-size:0.82em;color:#6B7280;margin-top:6px'>💡 " + tip_txt + "</div>" if tip_txt else ""}
+                        </div>""",
+                        unsafe_allow_html=True,
+                    )
+        else:
+            st.info(f"💡 **{student}의 수학 팁**: {info['math_tip']}")
+
+        # ── ✏️ 문제 풀기 ──
+        st.markdown("---")
+        st.markdown(
+            f"""<div style="background:{info['color']}15;border-radius:10px;
+            padding:12px 18px;margin-bottom:14px;font-weight:700;font-size:1.05em;
+            color:{info['color']}">
+            ✏️ 이제 직접 풀어봐요! — 20문제
+            </div>""",
+            unsafe_allow_html=True,
+        )
+
         with st.form(key=f"math_form_{student}", border=False):
-            for section_name, section_qs in topic_sections:
-                if section_qs:
-                    st.markdown(f"#### {section_name}")
-                    for q in section_qs:
-                        _render_question(q, f"math_{student}", answers, False)
+            for q in questions:
+                _render_question(q, f"math_{student}", answers, False)
 
             submitted_btn = st.form_submit_button(
                 "✅ 제출하고 채점받기", type="primary", use_container_width=True
@@ -742,14 +1100,17 @@ def run_math_quiz(student: str):
                     st.rerun()
 
     if submitted:
+        stored_plan = st.session_state.get(plan_key, learning_plan)
         _show_grading_screen(
-            student, "math", questions, answers, difficulty,
+            student, "math", questions, answers, stored_plan,
             passage="", expl_cache_key=expl_key
         )
         st.markdown("---")
         if st.button("🔄 새 문제 풀기", use_container_width=True, key=f"math_reset_{student}"):
-            for k in [data_key, ans_key, done_key, expl_key]:
+            for k in [data_key, ans_key, done_key, expl_key, plan_key]:
                 st.session_state.pop(k, None)
+            # 마스터리 업데이트 플래그 초기화
+            st.session_state.pop(f"mastery_done_{expl_key}", None)
             st.rerun()
 
 # ============================================================
@@ -777,11 +1138,14 @@ def _show_grading_screen(
     subject: str,
     questions: list,
     answers: dict,
-    difficulty: str,
+    learning_plan_or_diff,          # dict(수학) 또는 str(영어)
     passage: str = "",
     expl_cache_key: str = "",
 ):
     info = STUDENTS[student]
+    # 하위 호환: 영어는 difficulty string을 그대로 받음
+    difficulty = (learning_plan_or_diff if isinstance(learning_plan_or_diff, str)
+                  else f"level_{learning_plan_or_diff.get('current_level', 1)}")
 
     # ── 1. 채점 계산 ──
     results = []
@@ -797,13 +1161,18 @@ def _show_grading_screen(
     total        = len(results)
     pct          = round(score / total * 100, 1)
 
-    # ── 2. 오답 저장 (Google Sheets / 세션) ──
+    # ── 2. 오답 저장 + 수학 마스터리 업데이트 (한 번만) ──
     for r in wrong_list:
         save_wrong_answer(
             student, subject,
             r["q"].get("question", ""), r["correct"], r["user"],
             r["q"].get("concept", "unknown"), difficulty,
         )
+
+    mastery_flag = f"mastery_done_{expl_cache_key}"
+    if subject == "math" and not st.session_state.get(mastery_flag, False):
+        update_math_mastery(student, results)
+        st.session_state[mastery_flag] = True
 
     pts = save_study_record(student, subject, score, total)
 
@@ -965,6 +1334,76 @@ def _show_grading_screen(
     )
 
 # ============================================================
+#  수학 커리큘럼 진도 지도
+# ============================================================
+def _render_math_curriculum_map(student: str):
+    info = STUDENTS[student]
+    learning_plan = get_math_learning_plan(student)
+    current_level = learning_plan["current_level"]
+
+    st.markdown("### 🗺️ 수학 커리큘럼 진도 지도")
+    st.caption("✅ 마스터 완료 &nbsp;|&nbsp; 📚 학습 중 &nbsp;|&nbsp; 🔒 아직 잠금")
+
+    # 레벨별 진행률 요약 바
+    level_names = {1: "Year 4 기초", 2: "Year 4-5", 3: "Year 5",
+                   4: "Year 5-6", 5: "Year 6", 6: "Year 6 심화"}
+    for lvl in range(1, 7):
+        topics_at = [t for t in MATH_CURRICULUM if t["level"] == lvl]
+        mastered  = sum(1 for t in topics_at if is_topic_mastered(student, t["id"]))
+        total_t   = len(topics_at)
+        pct       = mastered / total_t if total_t else 0
+        is_current = lvl == current_level
+        bar_color  = info["color"] if is_current else ("#22C55E" if pct == 1.0 else "#D1D5DB")
+        border     = f"border:2px solid {info['color']};" if is_current else ""
+        st.markdown(
+            f"""<div style="display:flex;align-items:center;gap:10px;margin:4px 0;
+            background:{'#F0F9FF' if is_current else 'transparent'};
+            border-radius:8px;padding:6px 10px;{border}">
+            <div style="min-width:110px;font-size:0.82em;font-weight:{'800' if is_current else '400'};
+            color:{'#1E40AF' if is_current else '#6B7280'}">
+            {'▶ ' if is_current else ''}{level_names[lvl]}
+            </div>
+            <div style="flex:1;background:#E5E7EB;border-radius:6px;height:12px;overflow:hidden">
+              <div style="width:{pct*100:.0f}%;background:{bar_color};height:100%;
+              border-radius:6px;transition:width 0.5s"></div>
+            </div>
+            <div style="min-width:48px;font-size:0.8em;text-align:right;color:#6B7280">
+            {mastered}/{total_t}
+            </div>
+            </div>""",
+            unsafe_allow_html=True,
+        )
+
+    # 현재 레벨 토픽 카드
+    st.markdown(f"**📌 현재 레벨 {current_level} 상세 — {level_names.get(current_level, '')}**")
+    topics_at = [t for t in MATH_CURRICULUM if t["level"] == current_level]
+    cols = st.columns(min(len(topics_at), 4))
+    for i, topic in enumerate(topics_at):
+        m = get_topic_mastery(student, topic["id"])
+        mastered = is_topic_mastered(student, topic["id"])
+        if mastered:
+            bg, icon, txt_color = "#DCFCE7", "✅", "#15803D"
+            label = "마스터!"
+        elif m["attempts"] > 0:
+            pct_val = round(m["rate"] * 100) if m["rate"] >= 0 else 0
+            bg, icon, txt_color = "#FEF9C3", "📚", "#92400E"
+            label = f"{pct_val}%"
+        else:
+            bg, icon, txt_color = "#F3F4F6", "🔒", "#9CA3AF"
+            label = "미시작"
+        with cols[i % 4]:
+            st.markdown(
+                f"""<div style="background:{bg};border-radius:10px;padding:12px;
+                text-align:center;margin:3px;min-height:90px">
+                <div style="font-size:1.4em">{icon}</div>
+                <div style="font-size:0.8em;font-weight:700;color:{txt_color};
+                margin-top:4px;line-height:1.3">{topic['name_ko']}</div>
+                <div style="font-size:0.75em;color:{txt_color};margin-top:3px">{label}</div>
+                </div>""",
+                unsafe_allow_html=True,
+            )
+
+# ============================================================
 #  대시보드
 # ============================================================
 def render_dashboard(student: str):
@@ -995,6 +1434,8 @@ def render_dashboard(student: str):
         else:
             st.warning("🔢 수학: 아직 안 풀었어요")
 
+    st.markdown("---")
+    _render_math_curriculum_map(student)
     st.markdown("---")
     _render_calendar(student)
     st.markdown("---")
@@ -1149,6 +1590,7 @@ def main():
         "points":        {"시완": 0, "시원": 0, "시호": 0},
         "study_records": {},
         "wrong_log":     [],
+        "math_mastery":  {"시완": {}, "시원": {}, "시호": {}},
     }
     for k, v in defaults.items():
         if k not in st.session_state:
