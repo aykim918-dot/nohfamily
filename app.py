@@ -212,7 +212,7 @@ def save_study_record(student, subject, score, total):
 def _call_gemini(prompt: str) -> dict | None:
     """Gemini API 호출 → JSON 반환"""
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel("gemini-2.0-flash")
+    model = genai.GenerativeModel("gemini-2.0-flash-lite")
     try:
         resp = model.generate_content(prompt)
         raw = resp.text
@@ -230,7 +230,7 @@ def _call_gemini(prompt: str) -> dict | None:
 def _call_gemini_text(prompt: str) -> str:
     """Gemini API 호출 → 텍스트 반환"""
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel("gemini-2.0-flash")
+    model = genai.GenerativeModel("gemini-2.0-flash-lite")
     try:
         resp = model.generate_content(prompt)
         return resp.text.strip()
