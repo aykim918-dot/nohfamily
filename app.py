@@ -31,7 +31,7 @@ GSHEET_URL = '여기에_구글시트_URL을_넣으세요'  # ← Google Sheets U
 #  학생 프로파일 (학습 스타일 기반 개인화)
 # ============================================================
 STUDENTS = {
-    "시완": {
+    "Siwan": {
         "emoji": "🧠",
         "style": "logical",
         "color": "#3B82F6",
@@ -39,26 +39,25 @@ STUDENTS = {
         "passage_style": "analytical with clear cause-and-effect relationships, logical structure, and factual information",
         "math_style": "emphasizing pattern recognition, proof-like reasoning, and systematic step-by-step logic",
         "praise": [
-            "완벽한 논리야, 시완! 문제의 구조를 정확히 꿰뚫었어! 🎯",
-            "역시 시완! 단계별로 완벽하게 분석해냈어! 미래의 과학자네! 🔬",
+            "완벽한 논리야, Siwan! 문제의 구조를 정확히 꿰뚫었어! 🎯",
+            "역시 Siwan! 단계별로 완벽하게 분석해냈어! 미래의 과학자네! 🔬",
             "논리력 만점! 이 어려운 문제를 이렇게 체계적으로 풀다니! 🏆",
         ],
         "encouragement": [
-            "시완아, 단계별로 다시 접근해봐! 논리적으로 따라가면 답이 보일 거야! 💪",
-            "패턴을 다시 찾아봐! 시완이가 좋아하는 '왜냐하면~' 방식으로 생각해봐! 🤔",
+            "Siwan, 단계별로 다시 접근해봐! 논리적으로 따라가면 답이 보일 거야! 💪",
+            "패턴을 다시 찾아봐! Siwan이가 좋아하는 '왜냐하면~' 방식으로 생각해봐! 🤔",
             "괜찮아! 조건을 하나씩 정리해보면 분명히 풀 수 있어! 📋",
         ],
         "eng_tip": "글의 논리 구조(원인→결과, 주장→근거)를 먼저 파악해봐!",
-        "math_tip": "공식을 먼저 쓰고, 단계별로 차근차근 계산해봐!",
-        # 해설 생성 시 스타일 지침
+        "math_tip": "Write the formula first, then solve step by step!",
         "expl_style": (
-            "시완은 논리적 분석을 좋아해. "
-            "각 풀이 단계를 ①②③ 번호로 나눠서 설명하고, "
-            "'왜냐하면', '따라서', '결론적으로' 같은 논리적 연결어를 사용해줘. "
-            "왜 오답인지 논리적 근거를 먼저 제시하고, 올바른 추론 과정을 단계별로 보여줘."
+            "Siwan loves logical analysis. "
+            "Break down each solution step using ①②③ numbering. "
+            "Use logical connectors like 'because', 'therefore', 'in conclusion'. "
+            "First explain why the wrong answer is incorrect, then show the correct reasoning step by step."
         ),
     },
-    "시원": {
+    "Siwon": {
         "emoji": "🔢",
         "style": "arithmetic",
         "color": "#F97316",
@@ -66,26 +65,26 @@ STUDENTS = {
         "passage_style": "informational with numbers, statistics, measurements, and quantifiable data",
         "math_style": "with multiple calculation steps, precise arithmetic, and opportunities for verification",
         "praise": [
-            "완벽한 계산이야, 시원! 숫자 하나도 틀리지 않았어! 계산왕! 🧮",
-            "믿을 수 없어! 이런 복잡한 계산을 이렇게 정확하게! 시원 최고! ⭐",
+            "완벽한 계산이야, Siwon! 숫자 하나도 틀리지 않았어! 계산왕! 🧮",
+            "믿을 수 없어! 이런 복잡한 계산을 이렇게 정확하게! Siwon 최고! ⭐",
             "수학 천재 등장! 숫자들을 이렇게 완벽하게 다루다니! 🏆",
         ],
         "encouragement": [
-            "시원아, 계산을 다시 한번 검산해봐! 작은 실수일 수 있어! 🔍",
+            "Siwon, 계산을 다시 한번 검산해봐! 작은 실수일 수 있어! 🔍",
             "숫자를 천천히 다시 계산해봐! 너의 계산 실력이라면 분명히 찾을 거야! 💪",
             "단계별로 계산 결과를 확인해봐! 넌 할 수 있어! 🎯",
         ],
         "eng_tip": "모르는 단어의 뜻은 앞뒤 숫자나 수량 표현으로 추측해봐!",
-        "math_tip": "중간 계산 결과를 반드시 검산하는 습관을 들여봐!",
+        "math_tip": "Always double-check your calculations — one step at a time!",
         "expl_style": (
-            "시원은 숫자와 계산을 직관적으로 이해해. "
-            "시각적 비유(수직선, 도형, 분수 막대)를 텍스트로 묘사해주고, "
-            "모든 숫자 계산은 LaTeX 수식으로 깔끔하게 표시해줘. "
-            "'이 숫자들을 보면...', '계산해보면...' 같은 직관적 표현을 써줘. "
-            "검산 방법도 마지막에 보여줘."
+            "Siwon understands numbers and calculations intuitively. "
+            "Describe visual aids (number lines, shapes, fraction bars) in text. "
+            "Show all arithmetic clearly using LaTeX notation. "
+            "Use expressions like 'Looking at these numbers...' and 'If we calculate...'. "
+            "Always show a verification method at the end."
         ),
     },
-    "시호": {
+    "Siho": {
         "emoji": "📚",
         "style": "linguistic",
         "color": "#8B5CF6",
@@ -93,23 +92,23 @@ STUDENTS = {
         "passage_style": "narrative and descriptive with rich vocabulary, vivid imagery, and compelling storytelling",
         "math_style": "with rich story contexts, vivid real-world scenarios, and descriptive language",
         "praise": [
-            "멋져, 시호! 이야기 속 숨은 의미를 완벽하게 찾아냈어! 📖",
-            "언어 감각이 최고야! 시호는 진짜 독서왕이네! 📚",
+            "멋져, Siho! 이야기 속 숨은 의미를 완벽하게 찾아냈어! 📖",
+            "언어 감각이 최고야! Siho는 진짜 독서왕이네! 📚",
             "와~ 이렇게 어려운 글도 이해하다니! 작가가 되어도 되겠는걸! ✍️",
         ],
         "encouragement": [
-            "시호야, 본문을 다시 읽어봐! 답의 힌트가 이야기 속에 숨어 있어! 🔍",
-            "단어의 '느낌'으로 생각해봐! 시호는 감각이 좋으니까 분명히 알 거야! 💫",
+            "Siho, 본문을 다시 읽어봐! 답의 힌트가 이야기 속에 숨어 있어! 🔍",
+            "단어의 '느낌'으로 생각해봐! Siho는 감각이 좋으니까 분명히 알 거야! 💫",
             "이야기 흐름을 따라가봐! 주인공이라면 어떻게 했을까? 🌟",
         ],
         "eng_tip": "글의 분위기와 등장인물의 감정에 집중해봐!",
-        "math_tip": "문제를 이야기로 상상하면서 풀어봐! 주인공이 되어봐!",
+        "math_tip": "Imagine the problem as a story — picture yourself as the main character!",
         "expl_style": (
-            "시호는 이야기와 맥락 속에서 이해해. "
-            "문제 상황을 하나의 짧은 이야기로 재구성해서 설명해줘. "
-            "'이 이야기에서...', '주인공처럼 생각해보면...' 같은 표현을 써줘. "
-            "단어나 개념을 일상적인 상황에 비유해서 설명하고, "
-            "지문이 있다면 어느 부분이 힌트인지 직접 인용해줘."
+            "Siho understands best through stories and context. "
+            "Reframe the problem as a short story. "
+            "Use expressions like 'In this story...' and 'Thinking like the main character...'. "
+            "Use everyday analogies to explain concepts. "
+            "If there's a passage, directly quote the hint from it."
         ),
     },
 }
@@ -590,19 +589,19 @@ TODAY'S LEARNING TARGETS:
 TASK: Generate a JSON object with this EXACT structure:
 ```json
 {{
-  "topic_title": "오늘의 주제 (Korean, e.g. '두 자리 × 한 자리 곱셈')",
-  "topic_intro": "오늘 배울 내용 한 줄 소개 (Korean, friendly tone for a 10-year-old)",
+  "topic_title": "Today's Topic (English, e.g. '2-digit × 1-digit Multiplication')",
+  "topic_intro": "One fun sentence introducing today's topic (English, friendly tone for a 10-year-old, e.g. 'Today we are going to multiply bigger numbers — let's see how!')",
   "worked_examples": [
     {{
-      "title": "예제 제목 (Korean, e.g. '기본 곱셈')",
-      "problem": "예제 문제 (e.g. '34 × 3 = ?')",
+      "title": "Example title (English, e.g. 'Basic Multiplication')",
+      "problem": "Example problem (e.g. '34 × 3 = ?')",
       "steps": [
-        "① 일의 자리: 4 × 3 = 12 (받아올림 1)",
-        "② 십의 자리: 3 × 3 = 9, 받아올림 더하면 10",
-        "③ 답: 102"
+        "① Ones column: 4 × 3 = 12 (carry 1)",
+        "② Tens column: 3 × 3 = 9, plus carry 1 = 10",
+        "③ Answer: 102"
       ],
       "answer": "102",
-      "tip": "핵심 팁 (optional, Korean)"
+      "tip": "Key tip in English (optional, e.g. 'Split the number: 34 = 30 + 4, then multiply each part!')"
     }}
   ],
   "questions": [
@@ -1587,10 +1586,10 @@ def main():
         st.stop()
 
     defaults = {
-        "points":        {"시완": 0, "시원": 0, "시호": 0},
+        "points":        {"Siwan": 0, "Siwon": 0, "Siho": 0},
         "study_records": {},
         "wrong_log":     [],
-        "math_mastery":  {"시완": {}, "시원": {}, "시호": {}},
+        "math_mastery":  {"Siwan": {}, "Siwon": {}, "Siho": {}},
     }
     for k, v in defaults.items():
         if k not in st.session_state:
