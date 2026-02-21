@@ -213,7 +213,7 @@ api_key = st.secrets["GEMINI_API_KEY"]
 
 # 2. 이제 그 상자에 든 열쇠로 AI를 시작합니다.
 genai.configure(api_key=api_key)
-    model = genai.GenerativeModel("gemini-2.5-flash")
+model = genai.GenerativeModel("gemini-1.5-flash")
     try:
         resp = model.generate_content(prompt)
         raw = resp.text
