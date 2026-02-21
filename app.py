@@ -274,9 +274,9 @@ def _call_gemini_text(prompt: str) -> str:
 def generate_english_questions(student: str, difficulty: str, wrong_concepts: list) -> dict | None:
     info = STUDENTS[student]
     diff_map = {
-        "easy":   "Book 4 of '4000 Essential English Words'",
-        "medium": "Book 4 and Book 5 of '4000 Essential English Words'",
-        "hard":   "Book 5 of '4000 Essential English Words' (advanced vocabulary)",
+        "easy":   "Tier 2 academic vocabulary at A2 level: high-frequency school words that Year 4-5 EAL students need (e.g. describe, explain, compare, suggest, result, method, important, different, example, because)",
+        "medium": "Tier 2 academic vocabulary at B1 level: Year 5-6 EAL academic words (e.g. analyse, evidence, significant, process, conclude, feature, identify, purpose, effect, respond)",
+        "hard":   "Book 3 of '4000 Essential English Words' (B1 level): challenging academic vocabulary for Year 6 EAL students aiming above average",
     }
     review_note = (
         f"IMPORTANT: Include questions that review these vocabulary concepts "
@@ -284,16 +284,25 @@ def generate_english_questions(student: str, difficulty: str, wrong_concepts: li
         if wrong_concepts else ""
     )
     prompt = f"""
-You are creating an English reading quiz for a New Zealand Year 5-6 student named {student}.
+You are creating an English reading and vocabulary quiz for a New Zealand Year 5 EAL (English as Additional Language) student named {student}.
+This student speaks Korean at home and English only at school — design content to build genuine English proficiency.
 Learning style: {info['style']} — write the passage in a style that is {info['passage_style']}.
-Vocabulary source: {diff_map[difficulty]}.
+Vocabulary level: {diff_map[difficulty]}.
 {review_note}
 
 TASK: Generate a JSON object with this EXACT structure:
 ```json
 {{
   "passage_title": "Title here",
-  "passage": "2-3 paragraph reading passage (150-200 words). Write key vocabulary words in ALL CAPS.",
+  "passage": "2-3 paragraph reading passage (150-200 words). Write the 5 key vocabulary words in ALL CAPS each time they appear.",
+  "key_words": [
+    {{
+      "word": "describe",
+      "korean": "묘사하다",
+      "definition": "to say what something or someone is like",
+      "example": "Can you describe what you saw at the beach?"
+    }}
+  ],
   "questions": [
     {{
       "id": 1,
@@ -308,14 +317,25 @@ TASK: Generate a JSON object with this EXACT structure:
 }}
 ```
 
-QUESTION RULES:
-- Questions 1-10: Reading COMPREHENSION (types: main_idea, detail, inference, author_purpose, vocabulary_in_context)
-- Questions 11-20: VOCABULARY (types: definition, synonym, antonym, context_clue, word_usage)
-- Exactly 20 questions total, all 4-option multiple choice (A/B/C/D)
-- Wrong options must reflect real student errors (plausible distractors)
-- All content appropriate for 10-12 year olds
-- Write entirely in English (questions and options)
-- explanation field: briefly state WHERE in the passage the answer is found
+KEY WORDS RULES:
+- Choose exactly 5 important vocabulary words from the passage
+- These must be Tier 2 academic words (useful across subjects, not too rare)
+- korean: provide accurate Korean translation
+- definition: simple English definition a 9-10 year old can understand
+- example: a natural example sentence different from the passage
+
+QUESTION DISTRIBUTION (exactly 20 questions, all 4-option multiple choice A/B/C/D):
+- Questions 1-8: Reading COMPREHENSION (types: main_idea, detail, inference, author_purpose, vocabulary_in_context)
+- Questions 9-13: VOCABULARY IN CONTEXT — guess meaning from clues in the passage (concept: context_clue)
+- Questions 14-17: WORD FAMILIES — choose the correct word form (e.g. "The scientist made an important ___ [discover/discovery/discovered/discovering]") (concept: word_family)
+- Questions 18-20: COLLOCATIONS & USAGE — choose the word that fits naturally (e.g. "make a ___" / "do your ___") (concept: collocation)
+
+RULES:
+- Passage must use each of the 5 key words at least twice so students see them in context
+- All questions in English only (no Korean in questions or options)
+- Wrong options must reflect real EAL student errors (confusion between word forms, false cognates)
+- Content appropriate for 9-11 year old EAL students
+- explanation field: quote the relevant part of the passage or explain the word form rule
 """
     return _call_gemini(prompt)
 
@@ -547,7 +567,7 @@ def run_english_quiz(student: str):
     st.caption(f"{info['emoji']} {student} · {info['style_desc']} 스타일 맞춤 문제")
 
     difficulty = calc_difficulty(student, "english")
-    diff_labels = {"easy": "⭐ 기본", "medium": "⭐⭐ 보통", "hard": "⭐⭐⭐ 심화"}
+    diff_labels = {"easy": "⭐ 기본 (Year 4-5 EAL)", "medium": "⭐⭐ 보통 (Year 5-6 EAL)", "hard": "⭐⭐⭐ 심화 (Year 6 EAL)"}
     st.info(f"현재 난이도: **{diff_labels[difficulty]}** (정답률에 따라 자동 조정됩니다)")
 
     wrong_concepts = get_wrong_concepts(student, "english")
@@ -575,8 +595,28 @@ def run_english_quiz(student: str):
     submitted = st.session_state[done_key]
     passage   = data.get("passage", "")
 
-    # ── 지문 표시 ──
+    # ── 핵심 단어 5개 코너 ──
     st.markdown("---")
+    key_words = data.get("key_words", [])
+    if key_words:
+        st.markdown("### 📚 오늘의 핵심 단어 5개")
+        st.caption("지문을 읽기 전에 이 단어들을 먼저 익혀보세요! 지문 속에서 찾아보는 것도 좋아요.")
+        kw_cols = st.columns(len(key_words))
+        for i, kw in enumerate(key_words):
+            with kw_cols[i]:
+                st.markdown(
+                    f"""<div style="background:#EFF6FF;border:2px solid {info['color']}60;
+                    border-radius:12px;padding:14px 10px;text-align:center;height:100%">
+                    <div style="font-size:1.15em;font-weight:800;color:{info['color']}">{kw.get('word','')}</div>
+                    <div style="font-size:0.9em;color:#6B7280;margin-top:4px;font-weight:600">{kw.get('korean','')}</div>
+                    <div style="font-size:0.78em;color:#374151;margin-top:8px;line-height:1.5">{kw.get('definition','')}</div>
+                    <div style="font-size:0.72em;color:#9CA3AF;margin-top:6px;font-style:italic">"{kw.get('example','')}"</div>
+                    </div>""",
+                    unsafe_allow_html=True,
+                )
+        st.markdown("")
+
+    # ── 지문 표시 ──
     st.markdown(f"### 📝 {data.get('passage_title', '읽기 지문')}")
     passage_html = passage.replace("\n", "<br>")
     st.markdown(
@@ -603,11 +643,11 @@ def run_english_quiz(student: str):
             comp_qs  += remaining[:max(0, 10 - len(comp_qs))]
             vocab_qs += remaining[max(0, 10 - len(comp_qs)):max(0, 10 - len(vocab_qs)) + max(0, 10 - len(comp_qs))]
 
-            st.markdown("#### 📖 Part 1 — 독해 문제 (1~10번)")
+            st.markdown("#### 📖 Part 1 — 독해 문제 (1~8번)")
             for q in comp_qs:
                 _render_question(q, f"eng_{student}", answers, False)
 
-            st.markdown("#### 📚 Part 2 — 어휘 문제 (11~20번)")
+            st.markdown("#### 📚 Part 2 — 어휘·단어 가족·연어 문제 (9~20번)")
             for q in vocab_qs:
                 _render_question(q, f"eng_{student}", answers, False)
 
