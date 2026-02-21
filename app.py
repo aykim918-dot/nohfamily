@@ -208,7 +208,11 @@ def save_study_record(student, subject, score, total):
 # ============================================================
 def _call_gemini(prompt: str) -> dict | None:
     """Gemini API 호출 → JSON 반환"""
-    genai.configure(api_key=api_key)
+    # 1. 스트림릿 금고(Secrets)에서 'GEMINI_API_KEY'를 꺼내와서 api_key라는 상자에 담습니다.
+api_key = st.secrets["GEMINI_API_KEY"]
+
+# 2. 이제 그 상자에 든 열쇠로 AI를 시작합니다.
+genai.configure(api_key=api_key)
     model = genai.GenerativeModel("gemini-2.5-flash")
     try:
         resp = model.generate_content(prompt)
@@ -226,7 +230,11 @@ def _call_gemini(prompt: str) -> dict | None:
 
 def _call_gemini_text(prompt: str) -> str:
     """Gemini API 호출 → 텍스트 반환"""
-    genai.configure(api_key=api_key)
+    # 1. 스트림릿 금고(Secrets)에서 'GEMINI_API_KEY'를 꺼내와서 api_key라는 상자에 담습니다.
+api_key = st.secrets["GEMINI_API_KEY"]
+
+# 2. 이제 그 상자에 든 열쇠로 AI를 시작합니다.
+genai.configure(api_key=api_key)
     model = genai.GenerativeModel("gemini-2.5-flash")
     try:
         resp = model.generate_content(prompt)
