@@ -210,8 +210,35 @@ def save_study_record(student, subject, score, total):
 #  AI 핵심 호출 함수
 # ============================================================
 def _fix_json_escapes(s: str) -> str:
-    """JSON 내 LaTeX 백슬래시 이스케이프 오류 수정"""
-    return re.sub(r'\\(?!["\\/bfnrtu0-9])', r'\\\\', s)
+    """JSON 내 LaTeX 백슬래시 이스케이프 오류 수정 (문자 단위 처리)"""
+    valid_escapes = set('"\\\/bfnrt')
+    result = []
+    i = 0
+    while i < len(s):
+        if s[i] == '\\' and i + 1 < len(s):
+            next_char = s[i + 1]
+            if next_char in valid_escapes:
+                result.append('\\')
+                result.append(next_char)
+                i += 2
+            elif (next_char == 'u' and i + 5 < len(s) and
+                  all(c in '0123456789abcdefABCDEF' for c in s[i+2:i+6])):
+                result.append(s[i:i+6])
+                i += 6
+            else:
+                result.append('\\\\')
+                i += 1
+        else:
+            result.append(s[i])
+            i += 1
+    return ''.join(result)
+
+def _parse_json(json_str: str):
+    """JSON 파싱 — 실패 시 이스케이프 수정 후 재시도"""
+    try:
+        return json.loads(json_str)
+    except json.JSONDecodeError:
+        return json.loads(_fix_json_escapes(json_str))
 
 def _call_gemini(prompt: str) -> dict | None:
     """Gemini API 호출 → JSON 반환"""
@@ -222,10 +249,10 @@ def _call_gemini(prompt: str) -> dict | None:
         raw = resp.text
         m = re.search(r"```json\s*(.*?)\s*```", raw, re.DOTALL)
         if m:
-            return json.loads(_fix_json_escapes(m.group(1)))
+            return _parse_json(m.group(1))
         m = re.search(r"\{.*\}", raw, re.DOTALL)
         if m:
-            return json.loads(_fix_json_escapes(m.group()))
+            return _parse_json(m.group())
         return None
     except Exception as e:
         st.error(f"AI 오류: {e}")
