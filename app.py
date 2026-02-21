@@ -3,9 +3,6 @@
 #  Tech: Streamlit + Google Gemini AI + Google Sheets
 # ============================================================
 
-api_key = 'st.secrets["GEMINI_API_KEY"]'        # ← Google Gemini API 키를 여기에 입력하세요
-GSHEET_URL = '여기에_구글시트_URL을_넣으세요'  # ← Google Sheets URL을 여기에 입력하세요
-
 # ============================================================
 #  라이브러리
 # ============================================================
@@ -23,6 +20,12 @@ try:
     GSHEETS_AVAILABLE = True
 except ImportError:
     GSHEETS_AVAILABLE = False
+
+# ============================================================
+#  API 키 설정 (imports 이후에 위치해야 st.secrets 사용 가능)
+# ============================================================
+api_key = st.secrets["GEMINI_API_KEY"]          # ← Streamlit Secrets에서 자동으로 가져옵니다
+GSHEET_URL = '여기에_구글시트_URL을_넣으세요'  # ← Google Sheets URL을 여기에 입력하세요
 
 # ============================================================
 #  학생 프로파일 (학습 스타일 기반 개인화)
@@ -208,12 +211,8 @@ def save_study_record(student, subject, score, total):
 # ============================================================
 def _call_gemini(prompt: str) -> dict | None:
     """Gemini API 호출 → JSON 반환"""
-    # 1. 스트림릿 금고(Secrets)에서 'GEMINI_API_KEY'를 꺼내와서 api_key라는 상자에 담습니다.
-api_key = st.secrets["GEMINI_API_KEY"]
-
-# 2. 이제 그 상자에 든 열쇠로 AI를 시작합니다.
-genai.configure(api_key=api_key)
-model = genai.GenerativeModel("gemini-1.5-flash")
+    genai.configure(api_key=api_key)
+    model = genai.GenerativeModel("gemini-1.5-flash")
     try:
         resp = model.generate_content(prompt)
         raw = resp.text
@@ -230,12 +229,8 @@ model = genai.GenerativeModel("gemini-1.5-flash")
 
 def _call_gemini_text(prompt: str) -> str:
     """Gemini API 호출 → 텍스트 반환"""
-    # 1. 스트림릿 금고(Secrets)에서 'GEMINI_API_KEY'를 꺼내와서 api_key라는 상자에 담습니다.
-api_key = st.secrets["GEMINI_API_KEY"]
-
-# 2. 이제 그 상자에 든 열쇠로 AI를 시작합니다.
-genai.configure(api_key=api_key)
-    model = genai.GenerativeModel("gemini-2.5-flash")
+    genai.configure(api_key=api_key)
+    model = genai.GenerativeModel("gemini-1.5-flash")
     try:
         resp = model.generate_content(prompt)
         return resp.text.strip()
@@ -576,11 +571,11 @@ def run_english_quiz(student: str):
 
             st.markdown("#### 📖 Part 1 — 독해 문제 (1~10번)")
             for q in comp_qs:
-                _render_question(q, f"eng_{student}", answers, False, info["color"])
+                _render_question(q, f"eng_{student}", answers, False)
 
             st.markdown("#### 📚 Part 2 — 어휘 문제 (11~20번)")
             for q in vocab_qs:
-                _render_question(q, f"eng_{student}", answers, False, info["color"])
+                _render_question(q, f"eng_{student}", answers, False)
 
             submitted_btn = st.form_submit_button(
                 "✅ 제출하고 채점받기", type="primary", use_container_width=True
@@ -659,7 +654,7 @@ def run_math_quiz(student: str):
                 if section_qs:
                     st.markdown(f"#### {section_name}")
                     for q in section_qs:
-                        _render_question(q, f"math_{student}", answers, False, info["color"])
+                        _render_question(q, f"math_{student}", answers, False)
 
             submitted_btn = st.form_submit_button(
                 "✅ 제출하고 채점받기", type="primary", use_container_width=True
@@ -686,7 +681,7 @@ def run_math_quiz(student: str):
 # ============================================================
 #  공통: 문제 렌더링 (퀴즈 화면)
 # ============================================================
-def _render_question(q: dict, prefix: str, answers: dict, submitted: bool, color: str):
+def _render_question(q: dict, prefix: str, answers: dict, submitted: bool):
     qid = q.get("id", 0)
     with st.container():
         st.markdown(f"**{qid}. {q.get('question', '')}**")
