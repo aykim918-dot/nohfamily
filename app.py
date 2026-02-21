@@ -322,9 +322,9 @@ QUESTION RULES:
 def generate_math_questions(student: str, difficulty: str, wrong_concepts: list) -> dict | None:
     info = STUDENTS[student]
     diff_map = {
-        "easy":   "NZC Level 3-4 (Year 5-6): basic fractions, simple decimals, whole number operations",
-        "medium": "NZC Level 4 (Year 6-7): fraction operations, decimals to 3dp, simple algebraic equations (e.g. 3x + 4 = 19)",
-        "hard":   "NZC Level 4-5 (Year 7-8): complex fraction operations, multi-step algebra, ratio & proportion, percentage problems",
+        "easy":   "NZC Level 3-4 (Year 5 above average): multi-digit multiplication (e.g. 24×15), division with remainders (e.g. 96÷8), fractions with different denominators, decimals to 2dp — single-digit multiplication is TOO EASY, do NOT include it",
+        "medium": "NZC Level 4 (Year 6): fraction multiply/divide, percentages of quantities (e.g. 35% of 80), ratio basics (e.g. 3:5), multi-step word problems, decimals to 3dp",
+        "hard":   "NZC Level 4+ (Year 6 extension/challenge): complex fraction operations with mixed numbers, percentage increase/decrease, ratio and proportion, challenging multi-step word problems requiring 3+ steps",
     }
     review_note = (
         f"IMPORTANT: Include at least 3 questions that directly address these concepts "
@@ -332,7 +332,7 @@ def generate_math_questions(student: str, difficulty: str, wrong_concepts: list)
         if wrong_concepts else ""
     )
     prompt = f"""
-You are creating a Singapore Math-style quiz for a New Zealand Year 6-7 student named {student}.
+You are creating a Singapore Math-style quiz for a New Zealand Year 5 student (above average ability) named {student}.
 Learning style: {info['style']} — frame word problems {info['math_style']}.
 Curriculum level: {diff_map[difficulty]}.
 {review_note}
@@ -347,7 +347,7 @@ TASK: Generate a JSON object with this EXACT structure:
       "question": "Full word problem text here.",
       "options": ["A) ...", "B) ...", "C) ...", "D) ..."],
       "correct": "A",
-      "concept": "fraction_multiplication",
+      "concept": "fraction_addition",
       "solution": "Step 1: [describe step]. Step 2: [formula]. Step 3: Answer = [value]",
       "explanation": "One sentence why this is correct."
     }}
@@ -356,16 +356,19 @@ TASK: Generate a JSON object with this EXACT structure:
 ```
 
 QUESTION DISTRIBUTION (exactly 20 questions, all multiple choice A/B/C/D):
-- Questions 1-5: FRACTIONS (add, subtract, multiply, divide fractions & mixed numbers)
-- Questions 6-10: DECIMALS & PERCENTAGES (operations, conversion, % of a quantity)
-- Questions 11-15: BASIC ALGEBRA (solve for x, simplify expressions, number patterns)
-- Questions 16-20: MULTI-STEP WORD PROBLEMS (Singapore bar model style, NZ contexts: rugby, farms, beaches, kiwi birds)
+- Questions 1-5: FRACTIONS (equivalent fractions, add/subtract with different denominators, multiply fraction by whole number, simple mixed numbers)
+- Questions 6-10: DECIMALS & PERCENTAGES (decimals to 2dp operations, 10%/25%/50%/75% of a quantity, fraction↔decimal conversions)
+- Questions 11-15: MULTIPLICATION, DIVISION & PATTERNS (multi-digit multiplication e.g. 23×14, division with remainders, missing number patterns e.g. ___ × 6 = 144, factor pairs)
+- Questions 16-20: MULTI-STEP WORD PROBLEMS (Singapore bar model style, NZ contexts: rugby, farms, beaches, kiwi birds, Maori culture — requires 2-3 steps to solve)
 
 RULES:
+- NEVER include single-digit × single-digit questions — these are too easy
+- Questions must be genuinely challenging for an above-average Year 5 student
+- NO algebra with letter variables like x
 - Wrong options must reflect real student errors (wrong operation, arithmetic slip, unit confusion)
-- solution field: write ALL arithmetic using LaTeX notation e.g. $\\frac{{3}}{{4}} \\times \\frac{{2}}{{3}} = \\frac{{6}}{{12}} = \\frac{{1}}{{2}}$
+- solution field: write ALL arithmetic using LaTeX notation e.g. $\\frac{{3}}{{4}} + \\frac{{1}}{{4}} = \\frac{{4}}{{4}} = 1$
 - Use New Zealand real-world contexts in word problems
-- All content appropriate for 10-12 year olds
+- All content appropriate for 9-11 year olds
 """
     return _call_gemini(prompt)
 
@@ -640,7 +643,7 @@ def run_math_quiz(student: str):
     st.caption(f"{info['emoji']} {student} · {info['style_desc']} 스타일 맞춤 문제")
 
     difficulty = calc_difficulty(student, "math")
-    diff_labels = {"easy": "⭐ 기본 (Level 3-4)", "medium": "⭐⭐ 보통 (Level 4)", "hard": "⭐⭐⭐ 심화 (Level 4-5)"}
+    diff_labels = {"easy": "⭐ 기본 (Year 5)", "medium": "⭐⭐ 보통 (Year 5-6)", "hard": "⭐⭐⭐ 심화 (Year 6)"}
     st.info(f"현재 난이도: **{diff_labels[difficulty]}** (정답률에 따라 자동 조정됩니다)")
 
     wrong_concepts = get_wrong_concepts(student, "math")
