@@ -128,119 +128,149 @@ BADGES = [
 ]
 
 # ============================================================
-#  NZ 수학 커리큘럼 맵 (NZC Year 4→6, Level 1→6)
+#  NZ 수학 커리큘럼 맵 — Dragon Maths (Sigma) + NZC Year 5→6+
+#  Level 3 = Dragon Maths 3 완료 수준 (시작점)
 # ============================================================
 MATH_CURRICULUM = [
-    # ── Level 1: Year 4 기초 ──────────────────────────────────
-    {"id": "pt1", "level": 1, "strand": "패턴·대수",
-     "name_ko": "수 패턴 (덧·뺄셈)", "name_en": "Number patterns (+/−)",
-     "concepts": ["number_pattern", "sequence", "pattern", "number_sequence"]},
-    {"id": "wp1", "level": 1, "strand": "문장제",
-     "name_ko": "1단계 문장제",       "name_en": "1-step word problems",
-     "concepts": ["word_problem", "word_problem_1step", "one_step"]},
-    {"id": "fr1", "level": 1, "strand": "분수",
-     "name_ko": "단위 분수",           "name_en": "Unit fractions (½ ⅓ ¼)",
-     "concepts": ["unit_fraction", "fraction_basic", "fractions_of_set", "fraction_of_set",
-                  "simple_fractions", "fractions"]},
-    # ── Level 2: Year 4-5 ────────────────────────────────────
-    {"id": "wn1", "level": 2, "strand": "정수",
-     "name_ko": "두 자리 × 한 자리", "name_en": "2-digit × 1-digit",
-     "concepts": ["multiplication", "multiplication_2d1d", "two_digit_multiplication"]},
-    {"id": "wn2", "level": 2, "strand": "정수",
-     "name_ko": "나머지 없는 나눗셈", "name_en": "Division (no remainder)",
-     "concepts": ["division", "division_no_remainder", "simple_division"]},
-    {"id": "fr2", "level": 2, "strand": "분수",
-     "name_ko": "동치 분수",           "name_en": "Equivalent fractions",
-     "concepts": ["equivalent_fractions", "fraction_equivalent", "equivalence"]},
-    {"id": "fr3", "level": 2, "strand": "분수",
-     "name_ko": "같은 분모 덧·뺄셈",  "name_en": "Fractions +/− (same denom)",
+    # ── Level 3: Dragon Maths 3 수준 (Year 5) ────────────────
+    # Number & Operations
+    {"id": "wn3", "level": 3, "strand": "Number",
+     "name_ko": "큰 수 곱셈·나눗셈", "name_en": "Multi-digit Multiplication & Division",
+     "concepts": ["multiplication_2d2d", "multi_digit_multiplication", "long_multiplication",
+                  "division_remainder", "division_with_remainder", "long_division"]},
+    {"id": "fr3", "level": 3, "strand": "Fractions",
+     "name_ko": "분수 덧·뺄셈 (같은 분모)", "name_en": "Fractions +/− (same denominator)",
      "concepts": ["fraction_addition", "fraction_subtraction", "fraction_same_denom",
-                  "same_denominator"]},
-    {"id": "dc1", "level": 2, "strand": "소수",
-     "name_ko": "소수 첫째 자리",     "name_en": "Decimals to 1dp",
-     "concepts": ["decimal_1dp", "decimals", "decimal_addition", "decimal_subtraction",
-                  "tenths"]},
-    {"id": "pt2", "level": 2, "strand": "패턴·대수",
-     "name_ko": "빈칸 채우기",         "name_en": "Missing numbers",
-     "concepts": ["missing_number", "missing_numbers", "find_the_missing"]},
-    # ── Level 3: Year 5 ──────────────────────────────────────
-    {"id": "wn3", "level": 3, "strand": "정수",
-     "name_ko": "두 자리 × 두 자리", "name_en": "2-digit × 2-digit",
-     "concepts": ["multiplication_2d2d", "multi_digit_multiplication", "long_multiplication"]},
-    {"id": "wn4", "level": 3, "strand": "정수",
-     "name_ko": "나머지 있는 나눗셈", "name_en": "Division with remainder",
-     "concepts": ["division_remainder", "division_with_remainder", "remainder"]},
-    {"id": "fr4", "level": 3, "strand": "분수",
-     "name_ko": "분수 × 정수",         "name_en": "Fraction × whole number",
-     "concepts": ["fraction_multiply_whole", "fraction_whole_number", "fraction_times_whole"]},
-    {"id": "fr5", "level": 3, "strand": "분수",
-     "name_ko": "분수 크기 비교",      "name_en": "Comparing fractions",
-     "concepts": ["fraction_compare", "fraction_ordering", "comparing_fractions",
-                  "ordering_fractions"]},
-    {"id": "dc2", "level": 3, "strand": "소수",
-     "name_ko": "소수 둘째 자리",     "name_en": "Decimals to 2dp",
-     "concepts": ["decimal_2dp", "decimal_operations", "hundredths"]},
-    {"id": "pc1", "level": 3, "strand": "백분율",
-     "name_ko": "10%, 50% 계산",       "name_en": "10% and 50%",
-     "concepts": ["percentage_basic", "percentage_10", "percentage_50", "percentages",
-                  "percentage", "simple_percentage"]},
-    {"id": "pt3", "level": 3, "strand": "패턴·대수",
-     "name_ko": "인수 쌍",             "name_en": "Factor pairs",
-     "concepts": ["factor_pairs", "factors", "factor_pair"]},
-    {"id": "wp2", "level": 3, "strand": "문장제",
-     "name_ko": "2단계 문장제",        "name_en": "2-step word problems",
-     "concepts": ["word_problem_2step", "multi_step", "two_step", "multi_step_problem"]},
-    # ── Level 4: Year 5-6 ────────────────────────────────────
-    {"id": "fr6", "level": 4, "strand": "분수",
-     "name_ko": "다른 분모 덧·뺄셈",  "name_en": "Fractions +/− (diff denom)",
+                  "same_denominator", "fractions"]},
+    {"id": "fr4", "level": 3, "strand": "Fractions",
+     "name_ko": "분수의 분수 (of)", "name_en": "Fractions of Quantities",
+     "concepts": ["fraction_of_quantity", "fraction_multiply_whole", "fractions_of_set",
+                  "fraction_whole_number"]},
+    {"id": "dc2", "level": 3, "strand": "Decimals",
+     "name_ko": "소수 덧·뺄셈·비교", "name_en": "Decimal Operations & Ordering",
+     "concepts": ["decimal_2dp", "decimal_operations", "decimal_addition",
+                  "decimal_subtraction", "ordering_decimals", "decimals"]},
+    {"id": "pc1", "level": 3, "strand": "Percentages",
+     "name_ko": "기초 백분율 (10%, 25%, 50%)", "name_en": "Basic Percentages (10%, 25%, 50%)",
+     "concepts": ["percentage_basic", "percentage_10", "percentage_25", "percentage_50",
+                  "percentages", "percentage", "simple_percentage"]},
+    # Measurement
+    {"id": "ms1", "level": 3, "strand": "Measurement",
+     "name_ko": "둘레와 넓이 (직사각형)", "name_en": "Perimeter & Area of Rectangles",
+     "concepts": ["perimeter", "area_rectangle", "measurement_area", "perimeter_rectangle",
+                  "area", "perimeter_of_shape"]},
+    {"id": "ms3", "level": 3, "strand": "Measurement",
+     "name_ko": "시간 계산", "name_en": "Time Calculations",
+     "concepts": ["time", "time_calculation", "duration", "elapsed_time", "time_problems",
+                  "reading_time", "am_pm"]},
+    # Geometry
+    {"id": "gm1", "level": 3, "strand": "Geometry",
+     "name_ko": "2D 도형과 각도", "name_en": "2D Shapes & Angles",
+     "concepts": ["angles", "shapes", "2d_shapes", "angle_types", "right_angle",
+                  "acute_angle", "obtuse_angle", "properties_of_shapes"]},
+    # Statistics
+    {"id": "st1", "level": 3, "strand": "Statistics",
+     "name_ko": "그래프 읽기", "name_en": "Reading & Interpreting Graphs",
+     "concepts": ["bar_graph", "picture_graph", "graph_reading", "interpret_graph",
+                  "tally_chart", "statistics_graphs"]},
+
+    # ── Level 4: Post Dragon Maths 3 (Year 5-6) ──────────────
+    # Number & Algebra
+    {"id": "fr6", "level": 4, "strand": "Fractions",
+     "name_ko": "다른 분모 덧·뺄셈", "name_en": "Fractions +/− (unlike denominators)",
      "concepts": ["fraction_different_denom", "fraction_unlike_denom",
                   "unlike_denominators", "different_denominators"]},
-    {"id": "dc3", "level": 4, "strand": "소수",
-     "name_ko": "× ÷ 10, 100",        "name_en": "× and ÷ by 10/100",
+    {"id": "fr5", "level": 4, "strand": "Fractions",
+     "name_ko": "동치 분수·분수 비교", "name_en": "Equivalent Fractions & Comparing",
+     "concepts": ["equivalent_fractions", "fraction_compare", "fraction_ordering",
+                  "comparing_fractions", "fraction_equivalent"]},
+    {"id": "dc3", "level": 4, "strand": "Decimals",
+     "name_ko": "소수 × ÷ 10, 100", "name_en": "Decimals × and ÷ by 10/100",
      "concepts": ["decimal_multiply_10", "decimal_divide_10", "multiply_by_10",
                   "divide_by_100", "powers_of_ten"]},
-    {"id": "pc2", "level": 4, "strand": "백분율",
-     "name_ko": "25%, 75% 계산",       "name_en": "25% and 75%",
-     "concepts": ["percentage_25", "percentage_75", "percentage_of_quantity",
-                  "percentage_quantity"]},
-    {"id": "rt1", "level": 4, "strand": "비율",
-     "name_ko": "간단한 비",           "name_en": "Simple ratios",
-     "concepts": ["ratio", "ratio_basic", "simple_ratio"]},
-    {"id": "wp3", "level": 4, "strand": "문장제",
-     "name_ko": "3단계 문장제",        "name_en": "3-step word problems",
-     "concepts": ["word_problem_3step", "multi_step_complex", "three_step",
-                  "complex_word_problem"]},
+    {"id": "pc2", "level": 4, "strand": "Percentages",
+     "name_ko": "백분율 계산 (임의)", "name_en": "Percentages of Quantities",
+     "concepts": ["percentage_of_quantity", "percentage_75", "percentage_any",
+                  "percentage_quantity", "find_percentage", "percentages"]},
+    {"id": "al1", "level": 4, "strand": "Algebra",
+     "name_ko": "대수 기초 (미지수)", "name_en": "Basic Algebra — Find the Unknown",
+     "concepts": ["algebra", "equation", "unknown", "solve_equation", "find_value",
+                  "simple_algebra", "missing_value", "find_unknown"]},
+    {"id": "rt1", "level": 4, "strand": "Ratio",
+     "name_ko": "비와 비율", "name_en": "Ratios & Rates",
+     "concepts": ["ratio", "ratio_basic", "simple_ratio", "rates", "ratio_problems"]},
+    # Measurement & Geometry
+    {"id": "ms4", "level": 4, "strand": "Measurement",
+     "name_ko": "넓이 (삼각형·복합도형)", "name_en": "Area of Triangles & Composite Shapes",
+     "concepts": ["area_triangle", "triangle_area", "composite_area", "area_compound",
+                  "area_of_triangle"]},
+    {"id": "ms5", "level": 4, "strand": "Measurement",
+     "name_ko": "부피와 용량", "name_en": "Volume & Capacity",
+     "concepts": ["volume", "volume_rectangular_prism", "capacity", "volume_cuboid",
+                  "volume_of_prism"]},
+    {"id": "ms6", "level": 4, "strand": "Measurement",
+     "name_ko": "단위 변환", "name_en": "Unit Conversions",
+     "concepts": ["unit_conversion", "convert_units", "measurement_conversion",
+                  "units_of_measurement", "converting_units"]},
+    {"id": "gm2", "level": 4, "strand": "Geometry",
+     "name_ko": "각도 계산", "name_en": "Calculating Angles",
+     "concepts": ["angle_calculation", "angles_in_triangle", "angles_on_line",
+                  "angles_sum", "missing_angle", "angles_in_shapes"]},
+    # Statistics
+    {"id": "st2", "level": 4, "strand": "Statistics",
+     "name_ko": "평균·최빈값·중앙값", "name_en": "Mean, Mode & Median",
+     "concepts": ["mean", "mode", "median", "average", "statistics_measures",
+                  "measures_of_central_tendency"]},
+
     # ── Level 5: Year 6 ──────────────────────────────────────
-    {"id": "fr7", "level": 5, "strand": "분수",
-     "name_ko": "대분수",              "name_en": "Mixed numbers",
+    {"id": "fr7", "level": 5, "strand": "Fractions",
+     "name_ko": "대분수와 가분수", "name_en": "Mixed Numbers & Improper Fractions",
      "concepts": ["mixed_numbers", "improper_fractions", "mixed_number",
                   "improper_to_mixed"]},
-    {"id": "fr8", "level": 5, "strand": "분수",
-     "name_ko": "분수 × 분수",         "name_en": "Fraction × fraction",
-     "concepts": ["fraction_multiply", "fraction_times_fraction",
-                  "fraction_multiplication"]},
-    {"id": "pc3", "level": 5, "strand": "백분율",
-     "name_ko": "임의 백분율 계산",    "name_en": "Any percentage of quantity",
-     "concepts": ["percentage_any", "percentage_any_quantity", "find_percentage"]},
-    {"id": "rt2", "level": 5, "strand": "비율",
-     "name_ko": "비 간단히·비 문장제", "name_en": "Ratio simplify & word problems",
+    {"id": "fr8", "level": 5, "strand": "Fractions",
+     "name_ko": "분수 곱셈·나눗셈", "name_en": "Fraction × and ÷",
+     "concepts": ["fraction_multiply", "fraction_times_fraction", "fraction_division",
+                  "fraction_multiplication", "fraction_divide"]},
+    {"id": "rt2", "level": 5, "strand": "Ratio",
+     "name_ko": "비 간단히·비례 문장제", "name_en": "Simplifying Ratios & Proportion",
      "concepts": ["ratio_simplify", "ratio_word_problem", "ratio_proportion",
-                  "simplifying_ratios"]},
-    # ── Level 6: Year 6 심화 ─────────────────────────────────
-    {"id": "fr9", "level": 6, "strand": "분수",
-     "name_ko": "분수 나누기",         "name_en": "Fraction ÷ fraction",
-     "concepts": ["fraction_division", "fraction_divide", "dividing_fractions"]},
-    {"id": "pc4", "level": 6, "strand": "백분율",
-     "name_ko": "백분율 증가·감소",    "name_en": "Percentage increase/decrease",
-     "concepts": ["percentage_change", "percentage_increase", "percentage_decrease",
-                  "percentage_change"]},
-    {"id": "rt3", "level": 6, "strand": "비율",
-     "name_ko": "비례 관계",           "name_en": "Proportion",
-     "concepts": ["proportion", "direct_proportion", "ratio_proportion_advanced"]},
-    {"id": "dc4", "level": 6, "strand": "소수",
-     "name_ko": "소수 셋째 자리",     "name_en": "Decimals to 3dp",
+                  "simplifying_ratios", "proportion"]},
+    {"id": "al2", "level": 5, "strand": "Algebra",
+     "name_ko": "대수 방정식", "name_en": "Algebra Equations (2-step)",
+     "concepts": ["algebra_equation", "linear_equation", "two_step_equation",
+                  "solve_for_unknown", "algebraic_expression"]},
+    {"id": "gm3", "level": 5, "strand": "Geometry",
+     "name_ko": "변환 (이동·반사·회전)·대칭", "name_en": "Transformations & Symmetry",
+     "concepts": ["translation", "reflection", "rotation", "transformations",
+                  "symmetry", "line_of_symmetry"]},
+    {"id": "st3", "level": 5, "strand": "Statistics",
+     "name_ko": "확률 기초", "name_en": "Basic Probability",
+     "concepts": ["probability", "chance", "likelihood", "theoretical_probability",
+                  "experimental_probability"]},
+
+    # ── Level 6: Year 6 Extension ────────────────────────────
+    {"id": "pc4", "level": 6, "strand": "Percentages",
+     "name_ko": "백분율 증가·감소", "name_en": "Percentage Increase & Decrease",
+     "concepts": ["percentage_change", "percentage_increase", "percentage_decrease"]},
+    {"id": "al3", "level": 6, "strand": "Algebra",
+     "name_ko": "대수 패턴·규칙", "name_en": "Algebra Patterns & Rules",
+     "concepts": ["algebraic_pattern", "rule", "nth_term", "algebra_rule",
+                  "number_rule", "generalising_patterns"]},
+    {"id": "dc4", "level": 6, "strand": "Decimals",
+     "name_ko": "소수 셋째 자리·연산", "name_en": "Decimals to 3dp & Operations",
      "concepts": ["decimal_3dp", "decimal_thousandths", "thousandths"]},
+    {"id": "ms7", "level": 6, "strand": "Measurement",
+     "name_ko": "복잡한 넓이·부피", "name_en": "Complex Area, Volume & Surface Area",
+     "concepts": ["surface_area", "complex_volume", "area_complex", "nets_3d",
+                  "volume_complex"]},
+    {"id": "st4", "level": 6, "strand": "Statistics",
+     "name_ko": "통계 종합·그래프 해석", "name_en": "Statistics: Graphs & Data Analysis",
+     "concepts": ["pie_chart", "line_graph", "data_analysis", "statistics_combined",
+                  "interpreting_statistics"]},
 ]
+
+# 학생들이 Dragon Maths 3까지 완료 → 최소 시작 레벨 = 3
+MIN_MATH_LEVEL = 3
 
 # ============================================================
 #  Google Sheets 함수
@@ -432,9 +462,9 @@ def get_math_learning_plan(student: str) -> dict:
     # 토픽별 마스터 여부 계산
     topic_mastered = {t["id"]: is_topic_mastered(student, t["id"]) for t in MATH_CURRICULUM}
 
-    # 현재 레벨: 미완료 토픽이 있는 가장 낮은 레벨
-    current_level = 1
-    for lvl in range(1, 7):
+    # 현재 레벨: Dragon Maths 3 완료 기준 → MIN_MATH_LEVEL(3)부터 탐색
+    current_level = MIN_MATH_LEVEL
+    for lvl in range(MIN_MATH_LEVEL, 7):
         topics_at = [t for t in MATH_CURRICULUM if t["level"] == lvl]
         if not topics_at:
             continue
@@ -545,99 +575,122 @@ RULES:
 
 def generate_math_questions(student: str, learning_plan: dict, wrong_concepts: list) -> dict | None:
     info = STUDENTS[student]
-    level = learning_plan["current_level"]
+    level   = learning_plan["current_level"]
     focus   = learning_plan["focus_topics"]
     review  = learning_plan["review_topics"]
     stretch = learning_plan["stretch_topics"]
 
     level_desc = {
-        1: "NZC Level 3 / Year 4: number patterns, unit fractions, simple 1-step word problems — keep numbers very small (answers under 50)",
-        2: "NZC Level 3 / Year 4-5: 2-digit×1-digit, division without remainders, equivalent fractions, same-denominator fractions, decimals to 1dp",
-        3: "NZC Level 3-4 / Year 5: 2-digit×2-digit, division with remainders, fraction×whole, comparing fractions, decimals to 2dp, 10%/50%",
-        4: "NZC Level 4 / Year 5-6: fractions with different denominators, ×÷ by 10/100, 25%/75%, simple ratios, 3-step word problems",
-        5: "NZC Level 4 / Year 6: mixed numbers, fraction×fraction, any percentage, ratio simplify and word problems",
-        6: "NZC Level 4+ / Year 6 extension: fraction division, percentage increase/decrease, proportion, decimals to 3dp",
+        3: ("Dragon Maths 3 level / NZC Year 5: multi-digit multiplication & division, "
+            "fractions (same denom, of quantities), decimals to 2dp, basic percentages (10/25/50%), "
+            "perimeter & area of rectangles, time calculations, 2D shapes & angles, reading graphs"),
+        4: ("Post Dragon Maths 3 / NZC Year 5-6: fractions with unlike denominators, "
+            "percentages of any quantity, simple ratios & rates, basic algebra (find the unknown using □), "
+            "area of triangles & composite shapes, volume, unit conversions, "
+            "calculating missing angles, mean/mode/median"),
+        5: ("NZC Year 6: mixed numbers & improper fractions, fraction × and ÷, "
+            "simplifying ratios & proportion, 2-step algebra equations, "
+            "transformations & symmetry, basic probability (fractions/decimals/percentages)"),
+        6: ("NZC Year 6 Extension: percentage increase/decrease, algebra patterns & rules (nth term), "
+            "decimals to 3dp, complex area/volume/surface area, "
+            "statistical graphs & data analysis, probability experiments"),
     }
 
     def topics_str(lst):
-        return "; ".join(f"{t['name_en']} ({t['name_ko']})" for t in lst) if lst else "none"
+        return "; ".join(t["name_en"] for t in lst) if lst else "none"
+
+    strands_in_focus = sorted(set(t["strand"] for t in focus)) if focus else ["Number"]
 
     review_note = (
-        f"IMPORTANT: Also include 2 questions reviewing these previously weak concepts: "
+        f"IMPORTANT: Include 2 questions reviewing these previously weak concepts: "
         f"{', '.join(wrong_concepts[:3])}.\n"
         if wrong_concepts else ""
     )
 
-    # Question counts
-    n_focus   = max(12, 20 - len(review) * 2 - (2 if stretch else 0))
-    n_review  = min(4, len(review) * 2)
+    n_review  = min(3, len(review))
     n_stretch = 2 if stretch else 0
-    # Ensure total = 20
-    n_focus = 20 - n_review - n_stretch
+    n_focus   = 20 - n_review - n_stretch
 
     prompt = f"""
-You are a warm, encouraging math teacher creating a quiz for a New Zealand Year 4-6 student named {student}.
+You are an enthusiastic New Zealand maths teacher writing a quiz for a Year 5-6 student named {student}.
+These students have COMPLETED Dragon Maths Books 1, 2 and 3 (Sigma Publications NZ).
 Learning style: {info['style']} — frame word problems {info['math_style']}.
-Overall curriculum level: {level_desc.get(level, level_desc[2])}.
+Curriculum level: {level_desc.get(level, level_desc[3])}.
 {review_note}
 
-TODAY'S LEARNING TARGETS:
-  • PRIMARY TOPICS (main focus): {topics_str(focus)}
-  • REVIEW TOPICS (build confidence): {topics_str(review)}
-  • STRETCH TOPICS (challenge preview): {topics_str(stretch)}
+⚠️ LANGUAGE RULE — THIS IS NON-NEGOTIABLE:
+Write EVERY piece of text in English. topic_title, topic_intro, example titles, steps, tips,
+questions, options, solutions, explanations — ALL in English. Zero Korean anywhere.
 
-TASK: Generate a JSON object with this EXACT structure:
+TODAY'S FOCUS:
+  PRIMARY: {topics_str(focus)}  (strands: {', '.join(strands_in_focus)})
+  REVIEW:  {topics_str(review) or 'n/a'}
+  STRETCH: {topics_str(stretch) or 'n/a'}
+
+STYLE: Dragon Maths (Sigma NZ) + Singapore Maths bar-model hybrid
+  - Dragon Maths style: crisp mixed-strand questions, NZ practical contexts, clear diagrams described in text
+  - Singapore Maths style: multi-step word problems, bar model reasoning, visual thinking
+  - NZ contexts: rugby, kiwi birds, Māori culture, farms, beaches, NZ geography, school fair
+
+TASK — Generate this exact JSON (all text in English):
 ```json
 {{
-  "topic_title": "Today's Topic (English, e.g. '2-digit × 1-digit Multiplication')",
-  "topic_intro": "One fun sentence introducing today's topic (English, friendly tone for a 10-year-old, e.g. 'Today we are going to multiply bigger numbers — let's see how!')",
+  "topic_title": "Short English title e.g. 'Fractions, Area & Finding Unknowns'",
+  "topic_intro": "One energetic English sentence for a 10-year-old e.g. 'Time to mix fractions, shapes and mystery numbers!'",
   "worked_examples": [
     {{
-      "title": "Example title (English, e.g. 'Basic Multiplication')",
-      "problem": "Example problem (e.g. '34 × 3 = ?')",
+      "title": "English title e.g. 'Finding the Unknown'",
+      "problem": "English problem e.g. '3 × □ + 4 = 19. What is □?'",
       "steps": [
-        "① Ones column: 4 × 3 = 12 (carry 1)",
-        "② Tens column: 3 × 3 = 9, plus carry 1 = 10",
-        "③ Answer: 102"
+        "Step 1: Subtract 4 from both sides → 3 × □ = 15",
+        "Step 2: Divide both sides by 3 → □ = 5",
+        "Step 3: Check: 3 × 5 + 4 = 19 ✓  Answer: □ = 5"
       ],
-      "answer": "102",
-      "tip": "Key tip in English (optional, e.g. 'Split the number: 34 = 30 + 4, then multiply each part!')"
+      "answer": "□ = 5",
+      "tip": "Optional English tip e.g. 'Work backwards — undo the last operation first!'"
     }}
   ],
   "questions": [
     {{
       "id": 1,
-      "topic": "multiplication",
-      "question": "Full question text.",
+      "topic": "algebra",
+      "question": "Full English question text.",
       "options": ["A) ...", "B) ...", "C) ...", "D) ..."],
       "correct": "A",
-      "concept": "multiplication_2d1d",
+      "concept": "find_unknown",
       "solution": "Step 1: ... Step 2: ... Answer = ...",
-      "explanation": "One sentence why this is correct."
+      "explanation": "One English sentence explaining why the answer is correct."
     }}
   ]
 }}
 ```
 
-WORKED EXAMPLES RULES:
-- Create 2-3 worked examples that directly match the PRIMARY TOPICS
-- Steps must be clear, numbered ①②③, written in Korean
-- Show the thinking process a child should follow
-- Include a visual tip where helpful (e.g. "피자 4조각 중 생각해봐요!")
+WORKED EXAMPLES (2–3 examples):
+- Cover 2–3 different strands from the PRIMARY topics
+- Steps numbered Step 1 / Step 2 / Step 3 — all in English
+- Show a Check step where appropriate
 
-QUESTION DISTRIBUTION (exactly 20 questions, all 4-option multiple choice A/B/C/D):
-- Questions 1-{n_focus}: PRIMARY TOPICS — pitch at current level, mix of pure calculation + short word problems (NZ contexts)
-- Questions {n_focus+1}-{n_focus+n_review}: REVIEW TOPICS — slightly easier to build confidence
-- Questions {n_focus+n_review+1}-20: STRETCH TOPICS — one level harder as a preview challenge
+QUESTION DISTRIBUTION — exactly 20 questions, all A/B/C/D multiple choice:
+- Q1–5:   NUMBER strand — fractions, decimals, percentages, multi-digit operations
+- Q6–8:   ALGEBRA strand — find the unknown using □, number patterns, equations
+           (e.g. "4 × □ − 6 = 18, □ = ?")
+- Q9–12:  MEASUREMENT & GEOMETRY strand
+           (area, perimeter, volume, angles, unit conversions, shapes, transformations)
+- Q13–15: STATISTICS strand
+           (mean, mode, median, reading graphs, probability)
+- Q16–{n_focus}: More PRIMARY topics — word problems with NZ real-world contexts
+- Q{n_focus+1}–{n_focus+n_review}: REVIEW topics (slightly easier for confidence)
+- Q{n_focus+n_review+1}–20: STRETCH topics (one level up as a challenge)
 
-RULES:
-- Questions at current level should be achievable: aim for ~70% success for a student new to the topic
-- Concept field: use snake_case tags from this list: {', '.join(set(c for t in MATH_CURRICULUM for c in t['concepts'][:2]))}
-- Wrong options must reflect real mistakes (not random) — e.g. wrong operation, arithmetic slip
-- NO algebra with letter variables
-- solution field: use LaTeX for all maths e.g. $\\frac{{3}}{{4}} + \\frac{{1}}{{4}} = 1$
-- Use NZ contexts in word problems (rugby, farms, beaches, kiwi birds, Maori culture)
-- All content appropriate for 9-11 year olds
+DIFFICULTY RULES (Post Dragon Maths 3):
+- These students have finished Dragon Maths 3 — basic single-digit facts are too easy
+- Number questions: use multi-digit numbers; fractions should have denominators up to 12
+- Algebra: use □ symbol (not x or y); equations may have 2 steps (e.g. 2 × □ + 3 = 11)
+- Measurement: always include units in answers (cm², m, mL, kg, etc.)
+- Statistics: use realistic data sets of 5–8 values
+- Word problems: require 2–3 steps; set in NZ contexts
+- Wrong options: reflect real student errors (wrong operation, unit mistake, rounding error)
+- solution field: LaTeX for maths e.g. $\\frac{{3}}{{4}} + \\frac{{1}}{{4}} = 1$, $3 \\times \\square = 15$
 """
     return _call_gemini(prompt)
 
