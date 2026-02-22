@@ -348,6 +348,9 @@ def save_study_record(student, subject, score, total):
     }
     pts = score * 5
     st.session_state.points[student] = st.session_state.points.get(student, 0) + pts
+    # 공유 스토어에 즉시 반영 (다른 탭/창에서도 보이게)
+    _push_to_store_points(student)
+    _push_to_store_records()
     return pts
 
 # ============================================================
@@ -413,6 +416,48 @@ def _call_gemini_text(prompt: str) -> str:
         return ""
 
 # ============================================================
+#  공유 스토어 — 세션(탭) 간 데이터 지속
+#  st.cache_resource: 서버가 살아있는 동안 모든 세션이 공유
+# ============================================================
+@st.cache_resource
+def _get_shared_store() -> dict:
+    """탭/창을 새로 열어도 점수·기록이 유지되는 서버 공유 스토어"""
+    return {
+        "points":        {"Siwan": 0, "Siwon": 0, "Siho": 0},
+        "study_records": {},
+        "math_mastery":  {"Siwan": {}, "Siwon": {}, "Siho": {}},
+    }
+
+def _sync_from_store():
+    """공유 스토어 → session_state 동기화 (세션 최초 방문 시)"""
+    if st.session_state.get("_store_synced"):
+        return
+    store = _get_shared_store()
+    st.session_state.points        = {k: v for k, v in store["points"].items()}
+    st.session_state.study_records = dict(store["study_records"])
+    st.session_state.math_mastery  = {
+        s: dict(v) for s, v in store["math_mastery"].items()
+    }
+    st.session_state._store_synced = True
+
+def _push_to_store_points(student: str):
+    """점수를 공유 스토어에 즉시 반영"""
+    store = _get_shared_store()
+    store["points"][student] = st.session_state.points.get(student, 0)
+
+def _push_to_store_records():
+    """study_records를 공유 스토어에 즉시 반영"""
+    store = _get_shared_store()
+    store["study_records"].update(st.session_state.study_records)
+
+def _push_to_store_mastery(student: str):
+    """math_mastery를 공유 스토어에 즉시 반영"""
+    store = _get_shared_store()
+    store["math_mastery"][student] = dict(
+        st.session_state.math_mastery.get(student, {})
+    )
+
+# ============================================================
 #  수학 마스터리 추적 함수
 # ============================================================
 def get_topic_for_concept(concept: str) -> str | None:
@@ -453,6 +498,8 @@ def update_math_mastery(student: str, results: list):
             entry["attempts"] += 1
             if r["is_ok"]:
                 entry["correct"] += 1
+    # 공유 스토어에 즉시 반영
+    _push_to_store_mastery(student)
 
 def get_math_learning_plan(student: str) -> dict:
     """
@@ -1638,15 +1685,12 @@ def main():
         )
         st.stop()
 
-    defaults = {
-        "points":        {"Siwan": 0, "Siwon": 0, "Siho": 0},
-        "study_records": {},
-        "wrong_log":     [],
-        "math_mastery":  {"Siwan": {}, "Siwon": {}, "Siho": {}},
-    }
-    for k, v in defaults.items():
-        if k not in st.session_state:
-            st.session_state[k] = v
+    # wrong_log는 세션 내에서만 유지 (GSheets로 영구 저장)
+    if "wrong_log" not in st.session_state:
+        st.session_state.wrong_log = []
+
+    # 첫 방문 시 공유 스토어에서 누적 데이터 로드 → 새 탭/창에서도 점수 유지
+    _sync_from_store()
 
     # ── 사이드바 ──
     with st.sidebar:
