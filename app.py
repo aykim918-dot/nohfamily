@@ -552,10 +552,38 @@ def get_math_learning_plan(student: str) -> dict:
 def generate_english_questions(student: str, difficulty: str, wrong_concepts: list) -> dict | None:
     info = STUDENTS[student]
     diff_map = {
-        "easy":   "Tier 2 academic vocabulary at A2 level: high-frequency school words that Year 4-5 EAL students need (e.g. describe, explain, compare, suggest, result, method, important, different, example, because)",
-        "medium": "Tier 2 academic vocabulary at B1 level: Year 5-6 EAL academic words (e.g. analyse, evidence, significant, process, conclude, feature, identify, purpose, effect, respond)",
-        "hard":   "Book 3 of '4000 Essential English Words' (B1 level): challenging academic vocabulary for Year 6 EAL students aiming above average",
+        "easy":   "Tier 2 academic vocabulary at A2 level — high-frequency academic words a Year 4-5 EAL student needs across subjects (NOT everyday basic words like 'big' or 'run', but school-use words like action verbs, adjectives, and nouns that appear in textbooks)",
+        "medium": "Tier 2 academic vocabulary at B1 level — Year 5-6 EAL academic words used in reports, explanations, and discussions across subjects",
+        "hard":   "Book 3 of '4000 Essential English Words' (B1 level) — challenging academic vocabulary for Year 6 EAL students aiming above average",
     }
+
+    # 매 세션 다른 단어·주제가 나오도록 날짜 + 랜덤 시드 주입
+    today      = date.today().isoformat()
+    rand_seed  = random.randint(1000, 9999)
+
+    # 최근 사용 단어 목록 (공유 스토어에서 불러옴)
+    store = _get_shared_store()
+    used_words_store = store.setdefault("used_eng_words", {})
+    recent_words = used_words_store.get(student, [])[-20:]  # 최근 20개 제외
+    avoid_note = (
+        f"CRITICAL — do NOT use any of these recently used key words: {', '.join(recent_words)}. "
+        "Choose completely different vocabulary.\n"
+        if recent_words else ""
+    )
+
+    # 랜덤 주제 풀 (매번 다른 지문 내용 유도)
+    topic_pool = [
+        "New Zealand native birds (kiwi, tui, kākāpō)", "ocean and marine life",
+        "space exploration and planets", "how plants grow and photosynthesis",
+        "Māori culture and traditions", "recycling and the environment",
+        "famous inventors and their discoveries", "the human body and health",
+        "weather patterns and climate", "ancient civilisations (Egypt, Rome, Greece)",
+        "food production and farming in NZ", "volcanoes and earthquakes",
+        "teamwork in sports", "migration and habitats of animals",
+        "the water cycle and rivers", "energy sources (solar, wind, hydro)",
+    ]
+    today_topic = topic_pool[rand_seed % len(topic_pool)]
+
     review_note = (
         f"IMPORTANT: Include questions that review these vocabulary concepts "
         f"the student previously got wrong: {', '.join(wrong_concepts[:4])}. "
@@ -566,7 +594,9 @@ You are creating an English reading and vocabulary quiz for a New Zealand Year 5
 This student speaks Korean at home and English only at school — design content to build genuine English proficiency.
 Learning style: {info['style']} — write the passage in a style that is {info['passage_style']}.
 Vocabulary level: {diff_map[difficulty]}.
-{review_note}
+TODAY'S DATE: {today} | SESSION SEED: {rand_seed} — generate FRESH content every session.
+TODAY'S PASSAGE TOPIC: {today_topic} — the passage MUST be about this topic.
+{avoid_note}{review_note}
 
 TASK: Generate a JSON object with this EXACT structure:
 ```json
@@ -950,6 +980,13 @@ def run_english_quiz(student: str):
         st.session_state[ans_key]   = {}
         st.session_state[done_key]  = False
         st.session_state[expl_key]  = {}  # 해설 캐시 초기화
+        # 사용된 핵심 단어를 공유 스토어에 기록 → 다음 세션에서 중복 방지
+        new_words = [kw.get("word", "") for kw in data.get("key_words", []) if kw.get("word")]
+        if new_words:
+            store = _get_shared_store()
+            used = store.setdefault("used_eng_words", {}).setdefault(student, [])
+            used.extend(new_words)
+            store["used_eng_words"][student] = used[-40:]  # 최근 40개만 유지
 
     data      = st.session_state[data_key]
     answers   = st.session_state[ans_key]
