@@ -1752,10 +1752,20 @@ def main():
         st.caption("NZ Year 5-6 | AI 맞춤 학습")
         st.markdown("---")
 
+        # 퀴즈 진행 중 여부 확인 (학생 변경 전에 먼저 체크)
+        _cur = st.session_state.get("student_sel", list(STUDENTS.keys())[0])
+        _quiz_active = (
+            (f"eng_data_{_cur}"  in st.session_state and not st.session_state.get(f"eng_done_{_cur}",  False)) or
+            (f"math_data_{_cur}" in st.session_state and not st.session_state.get(f"math_done_{_cur}", False))
+        )
+
         st.markdown("### 👦 누구예요?")
+        if _quiz_active:
+            st.warning("⚠️ 퀴즈 진행 중! 학생을 바꾸면 풀던 문제가 사라져요.", icon=None)
         student = st.radio(
             "학생",
             list(STUDENTS.keys()),
+            key="student_sel",           # ← 세션 상태에 고정 (리셋 방지)
             format_func=lambda x: f"{STUDENTS[x]['emoji']} {x}",
             label_visibility="collapsed",
         )
@@ -1777,6 +1787,7 @@ def main():
         menu = st.radio(
             "메뉴",
             ["🏠 대시보드", "📖 영어 퀴즈", "🔢 수학 퀴즈"],
+            key="menu_sel",              # ← 세션 상태에 고정 (리셋 방지)
             label_visibility="collapsed",
         )
 
