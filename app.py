@@ -457,6 +457,18 @@ def _push_to_store_mastery(student: str):
         st.session_state.math_mastery.get(student, {})
     )
 
+def reset_all_scores():
+    """전체 점수·기록·마스터리 초기화 (공유 스토어 + 현재 세션)"""
+    store = _get_shared_store()
+    store["points"]        = {"Siwan": 0, "Siwon": 0, "Siho": 0}
+    store["study_records"] = {}
+    store["math_mastery"]  = {"Siwan": {}, "Siwon": {}, "Siho": {}}
+    # 현재 세션도 즉시 반영
+    st.session_state.points        = {"Siwan": 0, "Siwon": 0, "Siho": 0}
+    st.session_state.study_records = {}
+    st.session_state.math_mastery  = {"Siwan": {}, "Siwon": {}, "Siho": {}}
+    st.session_state._store_synced = True
+
 # ============================================================
 #  수학 마스터리 추적 함수
 # ============================================================
@@ -1223,10 +1235,11 @@ def _render_question(q: dict, prefix: str, answers: dict, submitted: bool):
             f"q_{prefix}_{qid}",
             q.get("options", []),
             key=f"radio_{prefix}_{qid}",
+            index=None,           # 기본 선택 없음 — 아이가 직접 선택해야 함
             label_visibility="collapsed",
             disabled=submitted,
         )
-        if chosen:
+        if chosen is not None:
             answers[qid] = chosen[0]  # 'A' / 'B' / 'C' / 'D'
 
 # ============================================================
@@ -1261,19 +1274,23 @@ def _show_grading_screen(
     pct          = round(score / total * 100, 1)
 
     # ── 2. 오답 저장 + 수학 마스터리 업데이트 (한 번만) ──
-    for r in wrong_list:
-        save_wrong_answer(
-            student, subject,
-            r["q"].get("question", ""), r["correct"], r["user"],
-            r["q"].get("concept", "unknown"), difficulty,
-        )
-
+    record_flag  = f"record_done_{expl_cache_key}"
     mastery_flag = f"mastery_done_{expl_cache_key}"
-    if subject == "math" and not st.session_state.get(mastery_flag, False):
-        update_math_mastery(student, results)
-        st.session_state[mastery_flag] = True
 
-    pts = save_study_record(student, subject, score, total)
+    if not st.session_state.get(record_flag, False):
+        for r in wrong_list:
+            save_wrong_answer(
+                student, subject,
+                r["q"].get("question", ""), r["correct"], r["user"],
+                r["q"].get("concept", "unknown"), difficulty,
+            )
+        if subject == "math" and not st.session_state.get(mastery_flag, False):
+            update_math_mastery(student, results)
+            st.session_state[mastery_flag] = True
+        save_study_record(student, subject, score, total)
+        st.session_state[record_flag] = True
+
+    pts = score * 5
 
     # ── 3. 스코어 헤더 ──
     if pct >= 90:
@@ -1731,6 +1748,16 @@ def main():
         st.caption("📐 수학: NZC Level 4 · 싱가포르 매쓰")
         if not GSHEETS_AVAILABLE:
             st.caption("⚠️ streamlit-gsheets 미설치 → 오답이 세션에만 저장됩니다")
+
+        st.markdown("---")
+        with st.expander("⚙️ 관리자"):
+            st.caption("점수·기록·마스터리를 모두 0으로 초기화합니다.")
+            confirm = st.checkbox("정말 초기화할까요? ✅", key="reset_confirm")
+            if confirm:
+                if st.button("🔄 전체 점수 초기화", type="primary", use_container_width=True):
+                    reset_all_scores()
+                    st.success("✅ 초기화 완료! 세 명 모두 0점으로 시작합니다.")
+                    st.rerun()
 
     # ── 메인 콘텐츠 ──
     if menu == "🏠 대시보드":
