@@ -591,7 +591,7 @@ def generate_english_questions(student: str, difficulty: str, wrong_concepts: li
     )
     prompt = f"""
 You are creating an English reading and vocabulary quiz for a New Zealand Year 5 EAL (English as Additional Language) student named {student}.
-This student speaks Korean at home and English only at school — design content to build genuine English proficiency.
+This student is a boy. He speaks Korean at home and English only at school — design content to build genuine English proficiency.
 Learning style: {info['style']} — write the passage in a style that is {info['passage_style']}.
 Vocabulary level: {diff_map[difficulty]}.
 TODAY'S DATE: {today} | SESSION SEED: {rand_seed} — generate FRESH content every session.
@@ -701,7 +701,7 @@ def generate_math_questions(student: str, learning_plan: dict, wrong_concepts: l
     n_focus   = 20 - n_review - n_stretch
 
     prompt = f"""
-You are an enthusiastic New Zealand maths teacher writing a quiz for a Year 5-6 student named {student}.
+You are an enthusiastic New Zealand maths teacher writing a quiz for a Year 5-6 student named {student}. He is a boy.
 These students have COMPLETED Dragon Maths Books 1, 2 and 3 (Sigma Publications NZ).
 Learning style: {info['style']} — frame word problems {info['math_style']}.
 Curriculum level: {level_desc.get(level, level_desc[3])}.
@@ -804,7 +804,7 @@ def generate_ai_explanation(
 너는 따뜻하고 친절한 초등 수학 선생님이야. 아래 수학 오답 문제를 {student}에게 설명해줘.
 
 [학생 정보]
-이름: {student} / 학습 스타일: {info['style_desc']}
+이름: {student} / 성별: 남자 / 학습 스타일: {info['style_desc']}
 해설 방식: {info['expl_style']}
 
 [문제]
@@ -846,7 +846,7 @@ LaTeX 사용 규칙:
 너는 따뜻하고 친절한 초등 영어 선생님이야. 아래 영어 독해/어휘 오답 문제를 {student}에게 설명해줘.
 
 [학생 정보]
-이름: {student} / 학습 스타일: {info['style_desc']}
+이름: {student} / 성별: 남자 / 학습 스타일: {info['style_desc']}
 해설 방식: {info['expl_style']}
 
 [지문 (참고용)]
@@ -906,7 +906,7 @@ def generate_ai_feedback(student: str, subject: str, score: int, total: int, wro
     pct = round(score / total * 100, 1)
     info = STUDENTS[student]
     prompt = f"""
-{student}(이)라는 학생에게 한국어로 따뜻한 학습 피드백을 3-4문장으로 써줘.
+{student}(이)라는 남자 학생에게 한국어로 따뜻한 학습 피드백을 3-4문장으로 써줘.
 - 학생의 학습 스타일: {info['style_desc']}
 - 학습 스타일 특성: {info['expl_style']}
 - 과목: {subject}
