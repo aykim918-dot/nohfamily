@@ -1083,9 +1083,10 @@ def run_english_quiz(student: str):
                 "✅ 제출하고 채점받기", type="primary", use_container_width=True
             )
             if submitted_btn:
-                answered = sum(1 for q in questions if q.get("id") in answers)
-                if answered < len(questions):
-                    st.warning(f"모든 문제에 답해주세요! ({answered}/{len(questions)}개 완료)")
+                rendered_qs  = comp_qs + vocab_qs
+                answered = sum(1 for q in rendered_qs if q.get("id") in answers)
+                if answered < len(rendered_qs):
+                    st.warning(f"모든 문제에 답해주세요! ({answered}/{len(rendered_qs)}개 완료)")
                 else:
                     st.session_state[done_key] = True
                     st.rerun()
@@ -1098,7 +1099,8 @@ def run_english_quiz(student: str):
         )
         st.markdown("---")
         if st.button("🔄 새 문제 풀기", use_container_width=True, key=f"eng_reset_{student}"):
-            for k in [data_key, ans_key, done_key, expl_key]:
+            for k in [data_key, ans_key, done_key, expl_key,
+                      f"record_done_{expl_key}", f"ai_feedback_{expl_key}"]:
                 st.session_state.pop(k, None)
             st.rerun()
 
@@ -1255,10 +1257,10 @@ def run_math_quiz(student: str):
         )
         st.markdown("---")
         if st.button("🔄 새 문제 풀기", use_container_width=True, key=f"math_reset_{student}"):
-            for k in [data_key, ans_key, done_key, expl_key, plan_key]:
+            for k in [data_key, ans_key, done_key, expl_key, plan_key,
+                      f"record_done_{expl_key}", f"mastery_done_{expl_key}",
+                      f"ai_feedback_{expl_key}"]:
                 st.session_state.pop(k, None)
-            # 마스터리 업데이트 플래그 초기화
-            st.session_state.pop(f"mastery_done_{expl_key}", None)
             st.rerun()
 
 # ============================================================
@@ -1471,13 +1473,18 @@ def _show_grading_screen(
                     f"✅ **{r['q']['id']}번 정답!** — {r['q'].get('explanation', '')}"
                 )
 
-    # ── 7. 개인화 총평 피드백 ──
+    # ── 7. 개인화 총평 피드백 (세션 캐시 — 재렌더 시 API 재호출 방지) ──
     st.markdown("---")
     st.markdown("### 💬 오늘의 총평")
-    with st.spinner("🤖 AI가 오늘의 총평을 작성하고 있어요..."):
-        feedback = generate_ai_feedback(
-            student, subject, score, total, list(set(wrong_concepts))
-        )
+    feedback_key = f"ai_feedback_{expl_cache_key}"
+    if feedback_key not in st.session_state:
+        with st.spinner("🤖 AI가 오늘의 총평을 작성하고 있어요..."):
+            feedback = generate_ai_feedback(
+                student, subject, score, total, list(set(wrong_concepts))
+            )
+        st.session_state[feedback_key] = feedback
+    else:
+        feedback = st.session_state[feedback_key]
     st.markdown(
         f"""<div style="background:{info['color']}15; border:2px solid {info['color']}60;
         padding:20px 24px; border-radius:14px; line-height:1.85; font-size:1.02em">
