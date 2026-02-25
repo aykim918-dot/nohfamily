@@ -380,12 +380,43 @@ def _fix_json_escapes(s: str) -> str:
             i += 1
     return ''.join(result)
 
+def _sanitize_control_chars(s: str) -> str:
+    """JSON 문자열 값 내부의 제어 문자(줄바꿈·탭 등)를 이스케이프 처리.
+    'invalid control character' JSONDecodeError 방지용."""
+    result = []
+    in_string = False
+    escape_next = False
+    for ch in s:
+        if escape_next:
+            result.append(ch)
+            escape_next = False
+        elif ch == '\\':
+            result.append(ch)
+            escape_next = True
+        elif ch == '"':
+            result.append(ch)
+            in_string = not in_string
+        elif in_string and ord(ch) < 0x20:
+            # 문자열 내부 제어 문자 → 이스케이프 시퀀스로 변환
+            if ch == '\n':
+                result.append('\\n')
+            elif ch == '\r':
+                result.append('\\r')
+            elif ch == '\t':
+                result.append('\\t')
+            else:
+                result.append(f'\\u{ord(ch):04x}')
+        else:
+            result.append(ch)
+    return ''.join(result)
+
 def _parse_json(json_str: str):
-    """JSON 파싱 — 실패 시 이스케이프 수정 후 재시도"""
+    """JSON 파싱 — 실패 시 제어 문자·백슬래시 이스케이프 수정 후 재시도"""
     try:
         return json.loads(json_str)
     except json.JSONDecodeError:
-        return json.loads(_fix_json_escapes(json_str))
+        # 제어 문자 이스케이프 + 백슬래시 오류 동시 수정 후 재시도
+        return json.loads(_sanitize_control_chars(_fix_json_escapes(json_str)))
 
 def _call_gemini(prompt: str) -> dict | None:
     """Gemini API 호출 → JSON 반환"""
