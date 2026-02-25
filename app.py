@@ -410,13 +410,26 @@ def _sanitize_control_chars(s: str) -> str:
             result.append(ch)
     return ''.join(result)
 
+def _fix_latex_commands(s: str) -> str:
+    """JSON 내 단일 백슬래시 LaTeX 명령어를 이중 백슬래시로 변환 (json.loads 전처리).
+    예: \\frac → \\\\frac — \\f 가 JSON form-feed(0x0C)로 파싱되는 문제 방지."""
+    return re.sub(
+        r'(?<!\\)\\(frac|times|div|cdot|text|begin|end|right|left|binom|'
+        r'sqrt|sum|prod|int|nabla|beta|theta|rho|phi|psi|nu|'
+        r'boxed|bar|hat|vec|ne|ge|le|approx|infty|pm|mp)',
+        lambda m: '\\\\' + m.group(1),
+        s,
+    )
+
 def _parse_json(json_str: str):
-    """JSON 파싱 — 실패 시 제어 문자·백슬래시 이스케이프 수정 후 재시도"""
+    """JSON 파싱 — LaTeX 전처리 + 실패 시 제어 문자·백슬래시 이스케이프 수정 후 재시도"""
+    # LaTeX 명령어 백슬래시 전처리 (항상 적용 — json.loads 성공해도 데이터 오염 방지)
+    s = _fix_latex_commands(json_str)
     try:
-        return json.loads(json_str)
+        return json.loads(s)
     except json.JSONDecodeError:
         # 제어 문자 이스케이프 + 백슬래시 오류 동시 수정 후 재시도
-        return json.loads(_sanitize_control_chars(_fix_json_escapes(json_str)))
+        return json.loads(_sanitize_control_chars(_fix_json_escapes(s)))
 
 def _call_gemini(prompt: str) -> dict | None:
     """Gemini API 호출 → JSON 반환"""
@@ -1097,10 +1110,12 @@ def run_english_quiz(student: str):
         with st.form(key=f"eng_form_{student}", border=False):
             comp_qs  = [q for q in questions if q.get("type") == "comprehension"][:10]
             vocab_qs = [q for q in questions if q.get("type") != "comprehension"][:10]
-            # 부족하면 채우기
+            # 부족하면 채우기 (comp → vocab 순으로 배분, 중복 없음)
             remaining = [q for q in questions if q not in comp_qs and q not in vocab_qs]
-            comp_qs  += remaining[:max(0, 10 - len(comp_qs))]
-            vocab_qs += remaining[max(0, 10 - len(comp_qs)):max(0, 10 - len(vocab_qs)) + max(0, 10 - len(comp_qs))]
+            need_comp = max(0, 10 - len(comp_qs))
+            comp_qs  += remaining[:need_comp]
+            need_vocab = max(0, 10 - len(vocab_qs))
+            vocab_qs += remaining[need_comp:need_comp + need_vocab]
 
             st.markdown("#### 📖 Part 1 — 독해 문제 (1~8번)")
             for q in comp_qs:
@@ -1329,12 +1344,14 @@ def _show_grading_screen(
     difficulty = (learning_plan_or_diff if isinstance(learning_plan_or_diff, str)
                   else f"level_{learning_plan_or_diff.get('current_level', 1)}")
 
-    # ── 1. 채점 계산 ──
+    # ── 1. 채점 계산 (실제 출제된 문제만 — AI가 초과 생성해도 미출제 문제는 제외) ──
     results = []
     for q in questions:
-        qid   = q.get("id")
-        user  = answers.get(qid, "?")
-        corr  = q.get("correct", "")
+        qid = q.get("id")
+        if qid not in answers:
+            continue  # 출제되지 않은 문제는 채점에서 제외
+        user = answers[qid]
+        corr = q.get("correct", "")
         results.append({"q": q, "user": user, "correct": corr, "is_ok": user == corr})
 
     score        = sum(1 for r in results if r["is_ok"])
@@ -1394,7 +1411,7 @@ def _show_grading_screen(
         st.success("🎉 정답률 80% 이상! 다음 세션부터 더 어려운 문제에 도전해요!")
 
     # ── 4. 20문제 한눈에 보기 (그리드) ──
-    st.markdown("### 🗺️ 20문제 결과 한눈에 보기")
+    st.markdown(f"### 🗺️ {len(results)}문제 결과 한눈에 보기")
     grid = st.columns(10)
     for i, r in enumerate(results):
         col = grid[i % 10]
