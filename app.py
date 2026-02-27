@@ -1130,6 +1130,14 @@ def run_english_quiz(student: str):
             )
             if submitted_btn:
                 rendered_qs  = comp_qs + vocab_qs
+                # 세션 상태에서 라디오 버튼 값을 직접 수집 (form 내 업데이트 누락 방지)
+                _pfx = f"eng_{student}"
+                for _q in rendered_qs:
+                    _qid = _q.get("id", 0)
+                    _val = st.session_state.get(f"radio_{_pfx}_{_qid}")
+                    if _val is not None:
+                        _m = re.search(r'[A-Da-d]', _val[:5])
+                        answers[_qid] = _m.group(0).upper() if _m else _val[0].upper()
                 answered = sum(1 for q in rendered_qs if q.get("id") in answers)
                 if answered < len(rendered_qs):
                     st.warning(f"모든 문제에 답해주세요! ({answered}/{len(rendered_qs)}개 완료)")
@@ -1137,8 +1145,8 @@ def run_english_quiz(student: str):
                     st.session_state[done_key] = True
                     st.rerun()
 
-    # ── 채점 & 해설 화면 ──
-    if submitted:
+    # ── 채점 & 해설 화면 ── (done_key를 재확인 — pre-evaluated submitted 변수 의존 방지)
+    if st.session_state.get(done_key, False):
         _show_grading_screen(
             student, "english", questions, answers, difficulty,
             passage=passage, expl_cache_key=expl_key
@@ -1288,6 +1296,14 @@ def run_math_quiz(student: str):
                 "✅ 제출하고 채점받기", type="primary", use_container_width=True
             )
             if submitted_btn:
+                # 세션 상태에서 라디오 버튼 값을 직접 수집 (form 내 업데이트 누락 방지)
+                _pfx = f"math_{student}"
+                for _q in questions:
+                    _qid = _q.get("id", 0)
+                    _val = st.session_state.get(f"radio_{_pfx}_{_qid}")
+                    if _val is not None:
+                        _m = re.search(r'[A-Da-d]', _val[:5])
+                        answers[_qid] = _m.group(0).upper() if _m else _val[0].upper()
                 answered = sum(1 for q in questions if q.get("id") in answers)
                 if answered < len(questions):
                     st.warning(f"모든 문제에 답해주세요! ({answered}/{len(questions)}개 완료)")
@@ -1295,7 +1311,8 @@ def run_math_quiz(student: str):
                     st.session_state[done_key] = True
                     st.rerun()
 
-    if submitted:
+    # done_key를 재확인 — pre-evaluated submitted 변수 의존 방지
+    if st.session_state.get(done_key, False):
         stored_plan = st.session_state.get(plan_key, learning_plan)
         _show_grading_screen(
             student, "math", questions, answers, stored_plan,
@@ -1325,7 +1342,9 @@ def _render_question(q: dict, prefix: str, answers: dict, submitted: bool):
             disabled=submitted,
         )
         if chosen is not None:
-            answers[qid] = chosen[0]  # 'A' / 'B' / 'C' / 'D'
+            # 선택지가 "A) ...", "(A) ...", "a) ..." 형식 모두 'A'로 정규화
+            _m = re.search(r'[A-Da-d]', chosen[:5])
+            answers[qid] = _m.group(0).upper() if _m else chosen[0].upper()
 
 # ============================================================
 #  채점 & 상세 해설 화면 (Grading Screen) ← 핵심 강화 영역
@@ -1350,14 +1369,19 @@ def _show_grading_screen(
         qid = q.get("id")
         if qid not in answers:
             continue  # 출제되지 않은 문제는 채점에서 제외
-        user = answers[qid]
-        corr = q.get("correct", "")
+        user_raw = answers[qid]
+        # AI가 "A)" / "a" / " A" / "A. text" 등 다양하게 반환해도 첫 글자(대문자)만 비교
+        corr = q.get("correct", "").strip().upper()[:1]
+        user = user_raw.strip().upper()[:1] if user_raw else ""
         results.append({"q": q, "user": user, "correct": corr, "is_ok": user == corr})
 
     score        = sum(1 for r in results if r["is_ok"])
     wrong_list   = [r for r in results if not r["is_ok"]]
     wrong_concepts = [r["q"].get("concept", "unknown") for r in wrong_list]
     total        = len(results)
+    if total == 0:
+        st.error("채점할 답안이 없습니다. 다시 시도해주세요.")
+        return
     pct          = round(score / total * 100, 1)
 
     # ── 2. 오답 저장 + 수학 마스터리 업데이트 (한 번만) ──
