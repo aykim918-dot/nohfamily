@@ -431,6 +431,35 @@ def _parse_json(json_str: str):
         # 제어 문자 이스케이프 + 백슬래시 오류 동시 수정 후 재시도
         return json.loads(_sanitize_control_chars(_fix_json_escapes(s)))
 
+def _extract_json_object(text: str) -> str | None:
+    """텍스트에서 첫 번째 완전한 JSON 객체를 중괄호 계층 추적으로 추출.
+    greedy r'\\{.*\\}' 대신 사용 — 중첩 객체·설명 텍스트 혼재 시 올바른 범위만 확인."""
+    start = text.find('{')
+    if start == -1:
+        return None
+    depth = 0
+    in_str = False
+    escape = False
+    for i, ch in enumerate(text[start:], start):
+        if escape:
+            escape = False
+            continue
+        if ch == '\\' and in_str:
+            escape = True
+            continue
+        if ch == '"':
+            in_str = not in_str
+            continue
+        if in_str:
+            continue
+        if ch == '{':
+            depth += 1
+        elif ch == '}':
+            depth -= 1
+            if depth == 0:
+                return text[start:i + 1]
+    return None
+
 def _call_gemini(prompt: str) -> dict | None:
     """Gemini API 호출 → JSON 반환"""
     genai.configure(api_key=api_key)
@@ -438,12 +467,15 @@ def _call_gemini(prompt: str) -> dict | None:
     try:
         resp = model.generate_content(prompt)
         raw = resp.text
+        # 1순위: ```json ... ``` 코드 블록 (가장 신뢰할 수 있는 형식)
         m = re.search(r"```json\s*(.*?)\s*```", raw, re.DOTALL)
         if m:
             return _parse_json(m.group(1))
-        m = re.search(r"\{.*\}", raw, re.DOTALL)
-        if m:
-            return _parse_json(m.group())
+        # 2순위: 중괄호 계층 추적으로 첫 완전한 JSON 객체 추출
+        # (greedy {.*} 대신 — 설명 텍스트가 섞여 있어도 올바른 범위만 잡음)
+        obj_str = _extract_json_object(raw)
+        if obj_str:
+            return _parse_json(obj_str)
         return None
     except Exception as e:
         st.error(f"AI 오류: {e}")
@@ -1009,10 +1041,11 @@ def run_english_quiz(student: str):
     if wrong_concepts:
         st.warning(f"📌 이전에 틀린 개념 ({', '.join(set(wrong_concepts[:3]))}) 복습 문제가 포함되었어요!")
 
-    data_key  = f"eng_data_{student}"
-    ans_key   = f"eng_ans_{student}"
-    done_key  = f"eng_done_{student}"
-    expl_key  = f"explanations_english_{student}"
+    data_key      = f"eng_data_{student}"
+    ans_key       = f"eng_ans_{student}"
+    done_key      = f"eng_done_{student}"
+    expl_key      = f"explanations_english_{student}"
+    rendered_key  = f"eng_rendered_{student}"   # 실제 출제된 문제 ID 목록
 
     if data_key not in st.session_state:
         with st.spinner("🤖 AI가 맞춤 문제를 만들고 있어요... (약 30초 소요)"):
@@ -1142,18 +1175,23 @@ def run_english_quiz(student: str):
                 if answered < len(rendered_qs):
                     st.warning(f"모든 문제에 답해주세요! ({answered}/{len(rendered_qs)}개 완료)")
                 else:
+                    # 실제 출제된 문제 ID만 저장 → 채점 시 정확히 이 문제들만 평가
+                    st.session_state[rendered_key] = [q.get("id") for q in rendered_qs]
                     st.session_state[done_key] = True
                     st.rerun()
 
     # ── 채점 & 해설 화면 ── (done_key를 재확인 — pre-evaluated submitted 변수 의존 방지)
     if st.session_state.get(done_key, False):
+        # 저장된 rendered ID 목록으로 채점 대상 문제 확정 (AI가 초과 생성해도 안전)
+        rendered_ids = st.session_state.get(rendered_key, [])
+        qs_to_grade  = [q for q in questions if q.get("id") in rendered_ids] if rendered_ids else questions
         _show_grading_screen(
-            student, "english", questions, answers, difficulty,
+            student, "english", qs_to_grade, answers, difficulty,
             passage=passage, expl_cache_key=expl_key
         )
         st.markdown("---")
         if st.button("🔄 새 문제 풀기", use_container_width=True, key=f"eng_reset_{student}"):
-            for k in [data_key, ans_key, done_key, expl_key,
+            for k in [data_key, ans_key, done_key, expl_key, rendered_key,
                       f"record_done_{expl_key}", f"ai_feedback_{expl_key}"]:
                 st.session_state.pop(k, None)
             st.rerun()
@@ -1370,9 +1408,10 @@ def _show_grading_screen(
         if qid not in answers:
             continue  # 출제되지 않은 문제는 채점에서 제외
         user_raw = answers[qid]
-        # AI가 "A)" / "a" / " A" / "A. text" 등 다양하게 반환해도 첫 글자(대문자)만 비교
-        corr = q.get("correct", "").strip().upper()[:1]
-        user = user_raw.strip().upper()[:1] if user_raw else ""
+        # AI가 "A)" / "a" / " A" / "A. text" / null 등 다양하게 반환해도 첫 글자(대문자)만 비교
+        # q.get("correct", "") 는 correct:null 이면 None 반환 → (or "") 로 None 방어
+        corr = (q.get("correct") or "").strip().upper()[:1]
+        user = (user_raw or "").strip().upper()[:1]
         results.append({"q": q, "user": user, "correct": corr, "is_ok": user == corr})
 
     score        = sum(1 for r in results if r["is_ok"])
