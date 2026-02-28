@@ -1169,8 +1169,13 @@ def run_english_quiz(student: str):
                     _qid = _q.get("id", 0)
                     _val = st.session_state.get(f"radio_{_pfx}_{_qid}")
                     if _val is not None:
-                        _m = re.search(r'[A-Da-d]', _val[:5])
-                        answers[_qid] = _m.group(0).upper() if _m else _val[0].upper()
+                        _opts = _q.get("options", [])
+                        try:
+                            _idx = _opts.index(_val)
+                            answers[_qid] = chr(ord('A') + _idx)
+                        except ValueError:
+                            _m = re.search(r'[A-Da-d]', _val[:5])
+                            answers[_qid] = _m.group(0).upper() if _m else _val[0].upper()
                 answered = sum(1 for q in rendered_qs if q.get("id") in answers)
                 if answered < len(rendered_qs):
                     st.warning(f"모든 문제에 답해주세요! ({answered}/{len(rendered_qs)}개 완료)")
@@ -1340,8 +1345,13 @@ def run_math_quiz(student: str):
                     _qid = _q.get("id", 0)
                     _val = st.session_state.get(f"radio_{_pfx}_{_qid}")
                     if _val is not None:
-                        _m = re.search(r'[A-Da-d]', _val[:5])
-                        answers[_qid] = _m.group(0).upper() if _m else _val[0].upper()
+                        _opts = _q.get("options", [])
+                        try:
+                            _idx = _opts.index(_val)
+                            answers[_qid] = chr(ord('A') + _idx)
+                        except ValueError:
+                            _m = re.search(r'[A-Da-d]', _val[:5])
+                            answers[_qid] = _m.group(0).upper() if _m else _val[0].upper()
                 answered = sum(1 for q in questions if q.get("id") in answers)
                 if answered < len(questions):
                     st.warning(f"모든 문제에 답해주세요! ({answered}/{len(questions)}개 완료)")
@@ -1380,9 +1390,15 @@ def _render_question(q: dict, prefix: str, answers: dict, submitted: bool):
             disabled=submitted,
         )
         if chosen is not None:
-            # 선택지가 "A) ...", "(A) ...", "a) ..." 형식 모두 'A'로 정규화
-            _m = re.search(r'[A-Da-d]', chosen[:5])
-            answers[qid] = _m.group(0).upper() if _m else chosen[0].upper()
+            # 인덱스 기반 추출 (가장 안전) — 옵션 형식("A) ...", 순수 텍스트 등)에 무관하게 정확
+            _opts = q.get("options", [])
+            try:
+                _idx = _opts.index(chosen)
+                answers[qid] = chr(ord('A') + _idx)
+            except ValueError:
+                # 혹시 불일치 시 fallback: 텍스트에서 A-D 추출
+                _m = re.search(r'[A-Da-d]', chosen[:5])
+                answers[qid] = _m.group(0).upper() if _m else chosen[0].upper()
 
 # ============================================================
 #  채점 & 상세 해설 화면 (Grading Screen) ← 핵심 강화 영역
@@ -1408,9 +1424,11 @@ def _show_grading_screen(
         if qid not in answers:
             continue  # 출제되지 않은 문제는 채점에서 제외
         user_raw = answers[qid]
-        # AI가 "A)" / "a" / " A" / "A. text" / null 등 다양하게 반환해도 첫 글자(대문자)만 비교
-        # q.get("correct", "") 는 correct:null 이면 None 반환 → (or "") 로 None 방어
-        corr = (q.get("correct") or "").strip().upper()[:1]
+        # correct 필드: "A", "a", "A) text", "(A)", "option A" 등 다양한 형식 처리
+        _corr_raw = (q.get("correct") or "").strip().upper()
+        _cm = re.search(r'[A-D]', _corr_raw[:15])
+        corr = _cm.group(0) if _cm else _corr_raw[:1]
+        # user 답안은 이미 단일 대문자('A'~'D')로 정규화되어 저장됨
         user = (user_raw or "").strip().upper()[:1]
         results.append({"q": q, "user": user, "correct": corr, "is_ok": user == corr})
 
