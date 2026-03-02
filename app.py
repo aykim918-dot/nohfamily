@@ -1014,7 +1014,7 @@ def calc_difficulty(student: str, subject: str) -> str:
     recent = [
         v[subject]["pct"]
         for k, v in records.items()
-        if k.startswith(student) and subject in v
+        if k.startswith(student) and subject in v and "pct" in v.get(subject, {})
     ][-5:]
     if not recent:
         return "easy"
@@ -1152,37 +1152,26 @@ def run_english_quiz(student: str):
 
             st.markdown("#### 📖 Part 1 — 독해 문제 (1~8번)")
             for q in comp_qs:
-                _render_question(q, f"eng_{student}", answers, False)
+                _render_question(q, f"eng_{student}", False)
 
             st.markdown("#### 📚 Part 2 — 어휘·단어 가족·연어 문제 (9~20번)")
             for q in vocab_qs:
-                _render_question(q, f"eng_{student}", answers, False)
+                _render_question(q, f"eng_{student}", False)
 
             submitted_btn = st.form_submit_button(
                 "✅ 제출하고 채점받기", type="primary", use_container_width=True
             )
             if submitted_btn:
-                rendered_qs  = comp_qs + vocab_qs
-                # 세션 상태에서 라디오 버튼 값을 직접 수집 (form 내 업데이트 누락 방지)
-                _pfx = f"eng_{student}"
-                for _q in rendered_qs:
-                    _qid = _q.get("id", 0)
-                    _val = st.session_state.get(f"radio_{_pfx}_{_qid}")
-                    if _val is not None:
-                        _opts = _q.get("options", [])
-                        try:
-                            _idx = _opts.index(_val)
-                            answers[_qid] = chr(ord('A') + _idx)
-                        except ValueError:
-                            _m = re.search(r'[A-Da-d]', _val[:5])
-                            answers[_qid] = _m.group(0).upper() if _m else _val[0].upper()
-                answered = sum(1 for q in rendered_qs if q.get("id") in answers)
+                rendered_qs = comp_qs + vocab_qs
+                # 폼 제출 후 세션 스테이트에서 깔끔하게 답안 수집 (단일 경로)
+                collected = _collect_answers(rendered_qs, f"eng_{student}")
+                answered = len(collected)
                 if answered < len(rendered_qs):
                     st.warning(f"모든 문제에 답해주세요! ({answered}/{len(rendered_qs)}개 완료)")
                 else:
-                    # 실제 출제된 문제 ID만 저장 → 채점 시 정확히 이 문제들만 평가
+                    st.session_state[ans_key]      = collected
                     st.session_state[rendered_key] = [q.get("id") for q in rendered_qs]
-                    st.session_state[done_key] = True
+                    st.session_state[done_key]     = True
                     st.rerun()
 
     # ── 채점 & 해설 화면 ── (done_key를 재확인 — pre-evaluated submitted 변수 의존 방지)
@@ -1199,6 +1188,10 @@ def run_english_quiz(student: str):
             for k in [data_key, ans_key, done_key, expl_key, rendered_key,
                       f"record_done_{expl_key}", f"ai_feedback_{expl_key}"]:
                 st.session_state.pop(k, None)
+            # 라디오 버튼 세션 스테이트 초기화 (stale 값이 다음 퀴즈 채점을 막는 문제 방지)
+            for k in list(st.session_state.keys()):
+                if k.startswith(f"radio_eng_{student}_"):
+                    del st.session_state[k]
             st.rerun()
 
 # ============================================================
@@ -1333,29 +1326,19 @@ def run_math_quiz(student: str):
 
         with st.form(key=f"math_form_{student}", border=False):
             for q in questions:
-                _render_question(q, f"math_{student}", answers, False)
+                _render_question(q, f"math_{student}", False)
 
             submitted_btn = st.form_submit_button(
                 "✅ 제출하고 채점받기", type="primary", use_container_width=True
             )
             if submitted_btn:
-                # 세션 상태에서 라디오 버튼 값을 직접 수집 (form 내 업데이트 누락 방지)
-                _pfx = f"math_{student}"
-                for _q in questions:
-                    _qid = _q.get("id", 0)
-                    _val = st.session_state.get(f"radio_{_pfx}_{_qid}")
-                    if _val is not None:
-                        _opts = _q.get("options", [])
-                        try:
-                            _idx = _opts.index(_val)
-                            answers[_qid] = chr(ord('A') + _idx)
-                        except ValueError:
-                            _m = re.search(r'[A-Da-d]', _val[:5])
-                            answers[_qid] = _m.group(0).upper() if _m else _val[0].upper()
-                answered = sum(1 for q in questions if q.get("id") in answers)
+                # 폼 제출 후 세션 스테이트에서 깔끔하게 답안 수집 (단일 경로)
+                collected = _collect_answers(questions, f"math_{student}")
+                answered = len(collected)
                 if answered < len(questions):
                     st.warning(f"모든 문제에 답해주세요! ({answered}/{len(questions)}개 완료)")
                 else:
+                    st.session_state[ans_key]  = collected
                     st.session_state[done_key] = True
                     st.rerun()
 
@@ -1372,16 +1355,50 @@ def run_math_quiz(student: str):
                       f"record_done_{expl_key}", f"mastery_done_{expl_key}",
                       f"ai_feedback_{expl_key}"]:
                 st.session_state.pop(k, None)
+            # 라디오 버튼 세션 스테이트 초기화 (stale 값이 다음 퀴즈 채점을 막는 문제 방지)
+            for k in list(st.session_state.keys()):
+                if k.startswith(f"radio_math_{student}_"):
+                    del st.session_state[k]
             st.rerun()
 
 # ============================================================
-#  공통: 문제 렌더링 (퀴즈 화면)
+#  공통: 답안 수집 / 정답 정규화 헬퍼
 # ============================================================
-def _render_question(q: dict, prefix: str, answers: dict, submitted: bool):
+def _collect_answers(questions: list, prefix: str) -> dict:
+    """폼 제출 후 세션 스테이트의 라디오 값을 읽어 {qid: 'A'~'D'} 반환.
+    오직 여기서만 answers를 생성 — _render_question은 순수 렌더링만 담당."""
+    answers = {}
+    for q in questions:
+        qid = q.get("id", 0)
+        val = st.session_state.get(f"radio_{prefix}_{qid}")
+        if val is None:
+            continue
+        opts = q.get("options", [])
+        try:
+            idx = opts.index(val)
+            answers[qid] = chr(ord("A") + idx)
+        except ValueError:
+            m = re.search(r"[A-D]", str(val)[:5])
+            if m:
+                answers[qid] = m.group(0).upper()
+    return answers
+
+
+def _extract_correct(q: dict) -> str:
+    """correct 필드를 'A'~'D' 단일 대문자로 정규화."""
+    raw = (q.get("correct") or "").strip().upper()
+    m = re.search(r"[A-D]", raw[:15])
+    return m.group(0) if m else ""
+
+
+# ============================================================
+#  공통: 문제 렌더링 (퀴즈 화면) — 순수 렌더링만, 답안 수집 없음
+# ============================================================
+def _render_question(q: dict, prefix: str, submitted: bool):
     qid = q.get("id", 0)
     with st.container():
         st.markdown(f"**{qid}. {q.get('question', '')}**")
-        chosen = st.radio(
+        st.radio(
             f"q_{prefix}_{qid}",
             q.get("options", []),
             key=f"radio_{prefix}_{qid}",
@@ -1389,16 +1406,6 @@ def _render_question(q: dict, prefix: str, answers: dict, submitted: bool):
             label_visibility="collapsed",
             disabled=submitted,
         )
-        if chosen is not None:
-            # 인덱스 기반 추출 (가장 안전) — 옵션 형식("A) ...", 순수 텍스트 등)에 무관하게 정확
-            _opts = q.get("options", [])
-            try:
-                _idx = _opts.index(chosen)
-                answers[qid] = chr(ord('A') + _idx)
-            except ValueError:
-                # 혹시 불일치 시 fallback: 텍스트에서 A-D 추출
-                _m = re.search(r'[A-Da-d]', chosen[:5])
-                answers[qid] = _m.group(0).upper() if _m else chosen[0].upper()
 
 # ============================================================
 #  채점 & 상세 해설 화면 (Grading Screen) ← 핵심 강화 영역
@@ -1422,24 +1429,24 @@ def _show_grading_screen(
     for q in questions:
         qid = q.get("id")
         if qid not in answers:
-            continue  # 출제되지 않은 문제는 채점에서 제외
-        user_raw = answers[qid]
-        # correct 필드: "A", "a", "A) text", "(A)", "option A" 등 다양한 형식 처리
-        _corr_raw = (q.get("correct") or "").strip().upper()
-        _cm = re.search(r'[A-D]', _corr_raw[:15])
-        corr = _cm.group(0) if _cm else _corr_raw[:1]
-        # user 답안은 이미 단일 대문자('A'~'D')로 정규화되어 저장됨
-        user = (user_raw or "").strip().upper()[:1]
-        results.append({"q": q, "user": user, "correct": corr, "is_ok": user == corr})
+            continue  # 답안 없는 문제는 채점에서 제외
+        user = (answers[qid] or "").strip().upper()[:1]
+        corr = _extract_correct(q)          # 정답 정규화는 헬퍼에 위임
+        results.append({
+            "q": q,
+            "user": user,
+            "correct": corr,
+            "is_ok": bool(user) and bool(corr) and user == corr,
+        })
 
-    score        = sum(1 for r in results if r["is_ok"])
-    wrong_list   = [r for r in results if not r["is_ok"]]
-    wrong_concepts = [r["q"].get("concept", "unknown") for r in wrong_list]
-    total        = len(results)
+    total          = len(results)
     if total == 0:
-        st.error("채점할 답안이 없습니다. 다시 시도해주세요.")
+        st.error("채점할 답안이 없습니다. '새 문제 풀기'를 눌러 다시 시작해주세요.")
         return
-    pct          = round(score / total * 100, 1)
+    score          = sum(1 for r in results if r["is_ok"])
+    wrong_list     = [r for r in results if not r["is_ok"]]
+    wrong_concepts = [r["q"].get("concept", "unknown") for r in wrong_list]
+    pct            = round(score / total * 100, 1)
 
     # ── 2. 오답 저장 + 수학 마스터리 업데이트 (한 번만) ──
     record_flag  = f"record_done_{expl_cache_key}"
