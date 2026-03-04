@@ -1357,10 +1357,14 @@ def run_math_quiz(student: str):
     # done_key를 재확인 — pre-evaluated submitted 변수 의존 방지
     if st.session_state.get(done_key, False):
         stored_plan = st.session_state.get(plan_key, learning_plan)
-        _show_grading_screen(
-            student, "math", questions, answers, stored_plan,
-            passage="", expl_cache_key=expl_key
-        )
+        try:
+            _show_grading_screen(
+                student, "math", questions, answers, stored_plan,
+                passage="", expl_cache_key=expl_key
+            )
+        except Exception as _grading_err:
+            st.error(f"채점 화면 오류: {_grading_err}")
+            st.warning("아래 '새 문제 풀기'를 눌러 다시 시작하거나 페이지를 새로고침 해주세요.")
         st.markdown("---")
         if st.button("🔄 새 문제 풀기", use_container_width=True, key=f"math_reset_{student}"):
             for k in [data_key, ans_key, done_key, expl_key, plan_key,
