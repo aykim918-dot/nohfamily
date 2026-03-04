@@ -730,6 +730,7 @@ QUESTION DISTRIBUTION (exactly 20 questions, all 4-option multiple choice A/B/C/
 - Questions 18-20: COLLOCATIONS & USAGE — choose the word that fits naturally (e.g. "make a ___" / "do your ___") (concept: collocation)
 
 RULES:
+- CRITICAL: The 'passage' field MUST be written entirely in English. NEVER write the passage in Korean.
 - Passage must use each of the 5 key words at least twice so students see them in context
 - All questions in English only (no Korean in questions or options)
 - Wrong options must reflect real EAL student errors (confusion between word forms, false cognates)
@@ -1053,6 +1054,9 @@ def run_english_quiz(student: str):
         if not data or "questions" not in data:
             st.error("문제 생성에 실패했습니다. API 키와 인터넷 연결을 확인해주세요.")
             return
+        # 문제 ID 정규화: AI 생성 ID 중복·누락이어도 1~N 순번 보장 (라디오 키 충돌 방지)
+        for i, q in enumerate(data["questions"]):
+            q["id"] = i + 1
         st.session_state[data_key]  = data
         st.session_state[ans_key]   = {}
         st.session_state[done_key]  = False
@@ -1066,7 +1070,7 @@ def run_english_quiz(student: str):
             store["used_eng_words"][student] = used[-40:]  # 최근 40개만 유지
 
     data      = st.session_state[data_key]
-    answers   = st.session_state[ans_key]
+    answers   = st.session_state.get(ans_key, {})   # KeyError 방지
     submitted = st.session_state[done_key]
     passage   = data.get("passage", "")
 
@@ -1165,9 +1169,9 @@ def run_english_quiz(student: str):
                 rendered_qs = comp_qs + vocab_qs
                 # 폼 제출 후 세션 스테이트에서 깔끔하게 답안 수집 (단일 경로)
                 collected = _collect_answers(rendered_qs, f"eng_{student}")
-                answered = len(collected)
-                if answered < len(rendered_qs):
-                    st.warning(f"모든 문제에 답해주세요! ({answered}/{len(rendered_qs)}개 완료)")
+                missing = [q.get("id", "?") for q in rendered_qs if q.get("id") not in collected]
+                if missing:
+                    st.warning(f"아직 답하지 않은 문제: **{', '.join(str(m) for m in missing)}번**. 모든 문제를 선택해주세요!")
                 else:
                     st.session_state[ans_key]      = collected
                     st.session_state[rendered_key] = [q.get("id") for q in rendered_qs]
@@ -1179,10 +1183,15 @@ def run_english_quiz(student: str):
         # 저장된 rendered ID 목록으로 채점 대상 문제 확정 (AI가 초과 생성해도 안전)
         rendered_ids = st.session_state.get(rendered_key, [])
         qs_to_grade  = [q for q in questions if q.get("id") in rendered_ids] if rendered_ids else questions
-        _show_grading_screen(
-            student, "english", qs_to_grade, answers, difficulty,
-            passage=passage, expl_cache_key=expl_key
-        )
+        # 채점 화면 예외를 잡아서 화면이 사라지는 현상 방지
+        try:
+            _show_grading_screen(
+                student, "english", qs_to_grade, answers, difficulty,
+                passage=passage, expl_cache_key=expl_key
+            )
+        except Exception as _grading_err:
+            st.error(f"채점 화면 오류: {_grading_err}")
+            st.warning("아래 '새 문제 풀기'를 눌러 다시 시작하거나 페이지를 새로고침 해주세요.")
         st.markdown("---")
         if st.button("🔄 새 문제 풀기", use_container_width=True, key=f"eng_reset_{student}"):
             for k in [data_key, ans_key, done_key, expl_key, rendered_key,
@@ -1248,6 +1257,9 @@ def run_math_quiz(student: str):
         if not data or "questions" not in data:
             st.error("문제 생성에 실패했습니다. API 키와 인터넷 연결을 확인해주세요.")
             return
+        # 문제 ID 정규화: AI 생성 ID 중복·누락이어도 1~N 순번 보장 (라디오 키 충돌 방지)
+        for i, q in enumerate(data["questions"]):
+            q["id"] = i + 1
         st.session_state[data_key]  = data
         st.session_state[ans_key]   = {}
         st.session_state[done_key]  = False
@@ -1255,7 +1267,7 @@ def run_math_quiz(student: str):
         st.session_state[plan_key]  = learning_plan
 
     data      = st.session_state[data_key]
-    answers   = st.session_state[ans_key]
+    answers   = st.session_state.get(ans_key, {})   # KeyError 방지
     submitted = st.session_state[done_key]
     questions = data.get("questions", [])
 
@@ -1334,9 +1346,9 @@ def run_math_quiz(student: str):
             if submitted_btn:
                 # 폼 제출 후 세션 스테이트에서 깔끔하게 답안 수집 (단일 경로)
                 collected = _collect_answers(questions, f"math_{student}")
-                answered = len(collected)
-                if answered < len(questions):
-                    st.warning(f"모든 문제에 답해주세요! ({answered}/{len(questions)}개 완료)")
+                missing = [q.get("id", "?") for q in questions if q.get("id") not in collected]
+                if missing:
+                    st.warning(f"아직 답하지 않은 문제: **{', '.join(str(m) for m in missing)}번**. 모든 문제를 선택해주세요!")
                 else:
                     st.session_state[ans_key]  = collected
                     st.session_state[done_key] = True
