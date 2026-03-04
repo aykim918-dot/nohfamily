@@ -460,6 +460,12 @@ def _extract_json_object(text: str) -> str | None:
                 return text[start:i + 1]
     return None
 
+def _passage_is_korean(text: str) -> bool:
+    """passage 필드에 한글(Hangul) 음절이 10자 이상 포함되면 True — 재시도 트리거용"""
+    hangul_count = sum(1 for ch in text if '\uAC00' <= ch <= '\uD7A3')
+    return hangul_count >= 10
+
+
 def _call_gemini(prompt: str) -> dict | None:
     """Gemini API 호출 → JSON 반환"""
     genai.configure(api_key=api_key)
@@ -666,6 +672,10 @@ def generate_english_questions(student: str, difficulty: str, wrong_concepts: li
         if wrong_concepts else ""
     )
     prompt = f"""
+⚠️ LANGUAGE RULE (non-negotiable): The "passage" and "passage_title" fields MUST be written in ENGLISH ONLY.
+Korean is allowed ONLY in: grammar_focus.title, grammar_focus.point, key_words.korean fields.
+Every other field — especially the passage — must be in English.
+
 You are creating an English reading and vocabulary quiz for a New Zealand Year 5 EAL (English as Additional Language) student named {student}.
 This student is a boy. He speaks Korean at home and English only at school — design content to build genuine English proficiency.
 Learning style: {info['style']} — write the passage in a style that is {info['passage_style']}.
@@ -730,14 +740,18 @@ QUESTION DISTRIBUTION (exactly 20 questions, all 4-option multiple choice A/B/C/
 - Questions 18-20: COLLOCATIONS & USAGE — choose the word that fits naturally (e.g. "make a ___" / "do your ___") (concept: collocation)
 
 RULES:
-- CRITICAL: The 'passage' field MUST be written entirely in English. NEVER write the passage in Korean.
+- ⚠️ PASSAGE MUST BE IN ENGLISH ONLY — never use Korean in the passage or passage_title
 - Passage must use each of the 5 key words at least twice so students see them in context
 - All questions in English only (no Korean in questions or options)
 - Wrong options must reflect real EAL student errors (confusion between word forms, false cognates)
 - Content appropriate for 9-11 year old EAL students
 - explanation field: quote the relevant part of the passage or explain the word form rule
 """
-    return _call_gemini(prompt)
+    result = _call_gemini(prompt)
+    # 한글 감지 시 1회 재시도: Gemini가 passage를 한국어로 생성하는 경우 방어
+    if result and _passage_is_korean(result.get("passage", "")):
+        result = _call_gemini(prompt)
+    return result
 
 def generate_math_questions(student: str, learning_plan: dict, wrong_concepts: list) -> dict | None:
     info = STUDENTS[student]
@@ -1073,6 +1087,13 @@ def run_english_quiz(student: str):
     answers   = st.session_state.get(ans_key, {})   # KeyError 방지
     submitted = st.session_state[done_key]
     passage   = data.get("passage", "")
+
+    # 캐시된 지문이 한국어인 경우 자동 초기화 → 새 문제 생성 유도
+    if not submitted and _passage_is_korean(passage):
+        for k in [data_key, ans_key, done_key, expl_key, rendered_key]:
+            st.session_state.pop(k, None)
+        st.warning("지문이 한국어로 생성되었습니다. 자동으로 새 문제를 불러옵니다...")
+        st.rerun()
 
     # ── 오늘의 핵심 표현 (Grammar Focus) ──
     st.markdown("---")
