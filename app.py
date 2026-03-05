@@ -1061,6 +1061,7 @@ def run_english_quiz(student: str):
     done_key      = f"eng_done_{student}"
     expl_key      = f"explanations_english_{student}"
     rendered_key  = f"eng_rendered_{student}"   # 실제 출제된 문제 ID 목록
+    missing_key   = f"eng_missing_{student}"    # 미답 문제 ID 목록 (rerun 간 유지)
 
     if data_key not in st.session_state:
         with st.spinner("🤖 AI가 맞춤 문제를 만들고 있어요... (약 30초 소요)"):
@@ -1163,6 +1164,13 @@ def run_english_quiz(student: str):
         st.error("문제 데이터가 없습니다. 다시 시도해주세요.")
         return
 
+    # ── 미답 문제 경고 (form 바깥에서 표시 — rerun 후에도 유지됨) ──
+    if st.session_state.get(missing_key):
+        st.warning(
+            f"⚠️ 아직 답하지 않은 문제: **{', '.join(str(m) for m in st.session_state[missing_key])}번**. "
+            "모든 문제를 선택한 후 다시 제출해주세요!"
+        )
+
     # ── 문제 표시 (미제출 시) ──
     if not submitted:
         with st.form(key=f"eng_form_{student}", border=False):
@@ -1192,8 +1200,11 @@ def run_english_quiz(student: str):
                 collected = _collect_answers(rendered_qs, f"eng_{student}")
                 missing = [q.get("id", "?") for q in rendered_qs if q.get("id") not in collected]
                 if missing:
-                    st.warning(f"아직 답하지 않은 문제: **{', '.join(str(m) for m in missing)}번**. 모든 문제를 선택해주세요!")
+                    # session_state에 저장 → form 바깥에서 표시 (rerun 후에도 유지)
+                    st.session_state[missing_key] = missing
+                    st.rerun()
                 else:
+                    st.session_state.pop(missing_key, None)   # 이전 경고 제거
                     st.session_state[ans_key]      = collected
                     st.session_state[rendered_key] = [q.get("id") for q in rendered_qs]
                     st.session_state[done_key]     = True
@@ -1204,18 +1215,24 @@ def run_english_quiz(student: str):
         # 저장된 rendered ID 목록으로 채점 대상 문제 확정 (AI가 초과 생성해도 안전)
         rendered_ids = st.session_state.get(rendered_key, [])
         qs_to_grade  = [q for q in questions if q.get("id") in rendered_ids] if rendered_ids else questions
-        # 채점 화면 예외를 잡아서 화면이 사라지는 현상 방지
-        try:
-            _show_grading_screen(
-                student, "english", qs_to_grade, answers, difficulty,
-                passage=passage, expl_cache_key=expl_key
-            )
-        except Exception as _grading_err:
-            st.error(f"채점 화면 오류: {_grading_err}")
-            st.warning("아래 '새 문제 풀기'를 눌러 다시 시작하거나 페이지를 새로고침 해주세요.")
+        # 답안을 session_state에서 직접 재로드 (rerun 간 안정성 강화)
+        answers = st.session_state.get(ans_key, {})
+        if not answers:
+            # 답안이 없으면 채점 불가 — 안내 후 리셋 버튼 제공
+            st.error("⚠️ 저장된 답안이 없어 채점할 수 없습니다. '새 문제 풀기'를 눌러 다시 시작해주세요.")
+        else:
+            # 채점 화면 예외를 잡아서 화면이 사라지는 현상 방지
+            try:
+                _show_grading_screen(
+                    student, "english", qs_to_grade, answers, difficulty,
+                    passage=passage, expl_cache_key=expl_key
+                )
+            except Exception as _grading_err:
+                st.error(f"채점 화면 오류: {_grading_err}")
+                st.warning("아래 '새 문제 풀기'를 눌러 다시 시작하거나 페이지를 새로고침 해주세요.")
         st.markdown("---")
         if st.button("🔄 새 문제 풀기", use_container_width=True, key=f"eng_reset_{student}"):
-            for k in [data_key, ans_key, done_key, expl_key, rendered_key,
+            for k in [data_key, ans_key, done_key, expl_key, rendered_key, missing_key,
                       f"record_done_{expl_key}", f"ai_feedback_{expl_key}"]:
                 st.session_state.pop(k, None)
             # 라디오 버튼 세션 스테이트 초기화 (stale 값이 다음 퀴즈 채점을 막는 문제 방지)
