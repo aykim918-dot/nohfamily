@@ -1062,6 +1062,16 @@ def run_english_quiz(student: str):
     expl_key      = f"explanations_english_{student}"
     rendered_key  = f"eng_rendered_{student}"   # 실제 출제된 문제 ID 목록
     missing_key   = f"eng_missing_{student}"    # 미답 문제 ID 목록 (rerun 간 유지)
+    # ── 공유 스토어에서 채점 대기 상태 복구 (session_state 유실 / 탭 새로고침 대비) ──
+    _eng_pending_key = f"eng_pending_{student}"
+    _shared = _get_shared_store()
+    if _eng_pending_key in _shared and not st.session_state.get(done_key, False):
+        _ep = _shared[_eng_pending_key]
+        st.session_state[data_key]     = _ep["data"]
+        st.session_state[ans_key]      = _ep["answers"]
+        st.session_state[rendered_key] = _ep.get("rendered_ids", [])
+        st.session_state[done_key]     = True
+
 
     # ── 채점 모드 선 확인 (init 블록보다 먼저 — init이 done_key를 덮어쓰기 전에 처리) ──
     if st.session_state.get(done_key, False):
@@ -1090,6 +1100,7 @@ def run_english_quiz(student: str):
                 for k in [data_key, ans_key, done_key, expl_key, rendered_key, missing_key,
                           f"record_done_{expl_key}", f"ai_feedback_{expl_key}"]:
                     st.session_state.pop(k, None)
+                _get_shared_store().pop(f"eng_pending_{student}", None)
                 for k in list(st.session_state.keys()):
                     if k.startswith(f"radio_eng_{student}_"):
                         del st.session_state[k]
@@ -1245,6 +1256,12 @@ def run_english_quiz(student: str):
                     st.session_state[ans_key]      = collected
                     st.session_state[rendered_key] = [q.get("id") for q in rendered_qs]
                     st.session_state[done_key]     = True
+                    # 공유 스토어에도 백업 (session_state 유실 / 탭 새로고침 대비)
+                    _get_shared_store()[f"eng_pending_{student}"] = {
+                        "data":         st.session_state[data_key],
+                        "answers":      collected,
+                        "rendered_ids": [q.get("id") for q in rendered_qs],
+                    }
                     st.rerun()
 
     # (채점 화면은 함수 상단 '채점 모드 선 확인' 블록에서 처리됩니다)
@@ -1297,6 +1314,16 @@ def run_math_quiz(student: str):
     expl_key    = f"explanations_math_{student}"
     plan_key    = f"math_plan_{student}"
     missing_key = f"math_missing_{student}"
+    # ── 공유 스토어에서 채점 대기 상태 복구 (session_state 유실 / 탭 새로고침 대비) ──
+    _math_pending_key = f"math_pending_{student}"
+    _shared = _get_shared_store()
+    if _math_pending_key in _shared and not st.session_state.get(done_key, False):
+        _mp = _shared[_math_pending_key]
+        st.session_state[data_key] = _mp["data"]
+        st.session_state[ans_key]  = _mp["answers"]
+        st.session_state[plan_key] = _mp["plan"]
+        st.session_state[done_key] = True
+
 
     # ── 채점 모드 선 확인 (init 블록보다 먼저 — init이 done_key를 덮어쓰기 전에 처리) ──
     if st.session_state.get(done_key, False):
@@ -1322,6 +1349,7 @@ def run_math_quiz(student: str):
                           f"record_done_{expl_key}", f"mastery_done_{expl_key}",
                           f"ai_feedback_{expl_key}"]:
                     st.session_state.pop(k, None)
+                _get_shared_store().pop(f"math_pending_{student}", None)
                 for k in list(st.session_state.keys()):
                     if k.startswith(f"radio_math_{student}_"):
                         del st.session_state[k]
@@ -1436,6 +1464,12 @@ def run_math_quiz(student: str):
                     st.session_state.pop(missing_key, None)  # 이전 경고 제거
                     st.session_state[ans_key]  = collected
                     st.session_state[done_key] = True
+                    # 공유 스토어에도 백업 (session_state 유실 / 탭 새로고침 대비)
+                    _get_shared_store()[f"math_pending_{student}"] = {
+                        "data":    st.session_state[data_key],
+                        "answers": collected,
+                        "plan":    st.session_state.get(plan_key, learning_plan),
+                    }
                     st.rerun()
 
     # ── 미답 문제 경고 (form 바깥에서 표시 — rerun 후에도 유지됨) ──

@@ -345,6 +345,78 @@ def test_reset_cleanup():
 # ──────────────────────────────────────────────────────────────
 #  메인 실행
 # ──────────────────────────────────────────────────────────────
+
+
+# ──────────────────────────────────────────────────────────────
+#  테스트 7: session_state 유실 후 공유스토어에서 복구
+# ──────────────────────────────────────────────────────────────
+def test_shared_store_restore():
+    print("\n[테스트 7] session_state 유실 후 공유 스토어 복구")
+    student = "Siwan"
+    data_key    = f"math_data_{student}"
+    ans_key     = f"math_ans_{student}"
+    done_key    = f"math_done_{student}"
+    plan_key    = f"math_plan_{student}"
+    pending_key = f"math_pending_{student}"
+
+    # 공유스토어 시뮬레이션
+    shared_store = {}
+
+    # 제출 당시: 공유스토어에 백업 저장
+    dummy_data = {"questions": [{"id": i+1, "question": f"Q{i+1}", "options": ["A","B","C","D"], "correct": "A"} for i in range(20)]}
+    dummy_answers = {i+1: "A" for i in range(20)}
+    dummy_plan = {"current_level": 1}
+    shared_store[pending_key] = {
+        "data":    dummy_data,
+        "answers": dummy_answers,
+        "plan":    dummy_plan,
+    }
+
+    # session_state 유실 시뮬레이션: 완전히 새로운 session_state
+    ss = MockSessionState()
+    check("session_state 비어있음 (유실 시뮬레이션)", done_key not in ss)
+
+    # 복구 로직 (app.py 로직 복제)
+    if pending_key in shared_store and not ss.get(done_key, False):
+        _mp = shared_store[pending_key]
+        ss[data_key] = _mp["data"]
+        ss[ans_key]  = _mp["answers"]
+        ss[plan_key] = _mp["plan"]
+        ss[done_key] = True
+
+    check("공유스토어에서 done_key 복구됨", ss.get(done_key) is True)
+    check("공유스토어에서 ans_key 복구됨", len(ss.get(ans_key, {})) == 20)
+    check("공유스토어에서 data_key 복구됨", bool(ss.get(data_key)))
+    check("공유스토어에서 plan_key 복구됨", bool(ss.get(plan_key)))
+
+    # 복구 후 채점 화면으로 진입 가능한지 확인
+    _data     = ss.get(data_key, {})
+    _answers  = ss.get(ans_key, {})
+    _questions = _data.get("questions", [])
+    check("채점 가능: questions 있음", len(_questions) == 20)
+    check("채점 가능: answers 있음", len(_answers) == 20)
+
+
+# ──────────────────────────────────────────────────────────────
+#  테스트 8: 리셋 시 공유스토어 pending 삭제
+# ──────────────────────────────────────────────────────────────
+def test_shared_store_reset_cleanup():
+    print("\n[테스트 8] '새 문제 풀기' 시 공유스토어 pending 삭제")
+    student = "Siwon"
+    pending_key = f"math_pending_{student}"
+
+    shared_store = {
+        pending_key: {"data": {}, "answers": {}, "plan": {}},
+    }
+
+    check("리셋 전: pending 존재", pending_key in shared_store)
+
+    # 리셋 실행 (app.py 로직 복제)
+    shared_store.pop(pending_key, None)
+
+    check("리셋 후: pending 삭제됨", pending_key not in shared_store)
+    check("리셋 후: 스토어 비어있음", len(shared_store) == 0)
+
 if __name__ == "__main__":
     print("=" * 60)
     print("  삼둥이 AI 학습앱 퀴즈 플로우 테스트")
@@ -356,6 +428,8 @@ if __name__ == "__main__":
     test_rendered_key_fallback()
     test_extract_correct()
     test_reset_cleanup()
+    test_shared_store_restore()
+    test_shared_store_reset_cleanup()
 
     print("\n" + "=" * 60)
     passed = sum(1 for r in results if r[0] == PASS)
