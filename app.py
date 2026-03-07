@@ -1221,6 +1221,7 @@ def run_english_quiz(student: str):
 
     # ── 문제 표시 (미제출 시) ──
     if not submitted:
+        eng_submitted_btn = False
         with st.form(key=f"eng_form_{student}", border=False):
             comp_qs  = [q for q in questions if q.get("type") == "comprehension"][:10]
             vocab_qs = [q for q in questions if q.get("type") != "comprehension"][:10]
@@ -1239,10 +1240,10 @@ def run_english_quiz(student: str):
             for q in vocab_qs:
                 _render_question(q, f"eng_{student}", False)
 
-            submitted_btn = st.form_submit_button(
+            eng_submitted_btn = st.form_submit_button(
                 "✅ 제출하고 채점받기", type="primary", use_container_width=True
             )
-            if submitted_btn:
+            if eng_submitted_btn:
                 rendered_qs = comp_qs + vocab_qs
                 # 폼 제출 후 세션 스테이트에서 깔끔하게 답안 수집 (단일 경로)
                 collected = _collect_answers(rendered_qs, f"eng_{student}")
@@ -1250,7 +1251,6 @@ def run_english_quiz(student: str):
                 if missing:
                     # session_state에 저장 → form 바깥에서 표시 (rerun 후에도 유지)
                     st.session_state[missing_key] = missing
-                    st.rerun()
                 else:
                     st.session_state.pop(missing_key, None)   # 이전 경고 제거
                     st.session_state[ans_key]      = collected
@@ -1262,7 +1262,9 @@ def run_english_quiz(student: str):
                         "answers":      collected,
                         "rendered_ids": [q.get("id") for q in rendered_qs],
                     }
-                    st.rerun()
+        # form 블록 바깥에서 rerun — form context manager가 RerunException을 삼키는 문제 방지
+        if eng_submitted_btn:
+            st.rerun()
 
     # (채점 화면은 함수 상단 '채점 모드 선 확인' 블록에서 처리됩니다)
 
@@ -1445,6 +1447,7 @@ def run_math_quiz(student: str):
             unsafe_allow_html=True,
         )
 
+        submitted_btn = False
         with st.form(key=f"math_form_{student}", border=False):
             for q in questions:
                 _render_question(q, f"math_{student}", False)
@@ -1459,7 +1462,6 @@ def run_math_quiz(student: str):
                 if missing:
                     # session_state에 저장 → form 바깥에서 표시 (rerun 후에도 유지)
                     st.session_state[missing_key] = missing
-                    st.rerun()
                 else:
                     st.session_state.pop(missing_key, None)  # 이전 경고 제거
                     st.session_state[ans_key]  = collected
@@ -1470,7 +1472,9 @@ def run_math_quiz(student: str):
                         "answers": collected,
                         "plan":    st.session_state.get(plan_key, learning_plan),
                     }
-                    st.rerun()
+        # form 블록 바깥에서 rerun — form context manager가 RerunException을 삼키는 문제 방지
+        if submitted_btn:
+            st.rerun()
 
     # ── 미답 문제 경고 (form 바깥에서 표시 — rerun 후에도 유지됨) ──
     if st.session_state.get(missing_key):
