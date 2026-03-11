@@ -1446,33 +1446,26 @@ def run_math_quiz(student: str):
             unsafe_allow_html=True,
         )
 
-        submitted_btn = False
-        with st.form(key=f"math_form_{student}", border=False):
-            for q in questions:
-                _render_question(q, f"math_{student}", False)
+        for q in questions:
+            _render_question(q, f"math_{student}", False)
 
-            submitted_btn = st.form_submit_button(
-                "✅ 제출하고 채점받기", type="primary", use_container_width=True
-            )
-            if submitted_btn:
-                # 폼 제출 후 세션 스테이트에서 깔끔하게 답안 수집 (단일 경로)
-                collected = _collect_answers(questions, f"math_{student}")
-                missing = [q.get("id", "?") for q in questions if q.get("id") not in collected]
-                if missing:
-                    # session_state에 저장 → form 바깥에서 표시 (rerun 후에도 유지)
-                    st.session_state[missing_key] = missing
-                else:
-                    st.session_state.pop(missing_key, None)  # 이전 경고 제거
-                    st.session_state[ans_key]  = collected
-                    st.session_state[done_key] = True
-                    # 공유 스토어에도 백업 (session_state 유실 / 탭 새로고침 대비)
-                    _get_shared_store()[f"math_pending_{student}"] = {
-                        "data":    st.session_state[data_key],
-                        "answers": collected,
-                        "plan":    st.session_state.get(plan_key, learning_plan),
-                    }
-        # form 블록 바깥에서 rerun — form context manager가 RerunException을 삼키는 문제 방지
-        if submitted_btn:
+        # st.form 대신 일반 버튼 사용 — form context manager가 session_state를
+        # 불안정하게 만드는 문제(채점 미전환 버그)를 근본적으로 차단
+        if st.button("✅ 제출하고 채점받기", type="primary",
+                     use_container_width=True, key=f"math_submit_{student}"):
+            collected = _collect_answers(questions, f"math_{student}")
+            missing = [q.get("id", "?") for q in questions if q.get("id") not in collected]
+            if missing:
+                st.session_state[missing_key] = missing
+            else:
+                st.session_state.pop(missing_key, None)
+                st.session_state[ans_key]  = collected
+                st.session_state[done_key] = True
+                _get_shared_store()[f"math_pending_{student}"] = {
+                    "data":    st.session_state[data_key],
+                    "answers": collected,
+                    "plan":    st.session_state.get(plan_key, learning_plan),
+                }
             st.rerun()
 
     # ── 미답 문제 경고 (form 바깥에서 표시 — rerun 후에도 유지됨) ──
