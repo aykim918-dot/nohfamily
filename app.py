@@ -746,6 +746,13 @@ RULES:
 - Wrong options must reflect real EAL student errors (confusion between word forms, false cognates)
 - Content appropriate for 9-11 year old EAL students
 - explanation field: quote the relevant part of the passage or explain the word form rule
+- CRITICAL — HOW TO SET THE 'correct' FIELD (follow this order every time):
+  Step 1: Determine the contextually/linguistically correct answer first.
+  Step 2: CHOOSE which position (A, B, C, or D) you will place it in.
+  Step 3: Write the options array so the correct answer is at that CHOSEN position.
+  Step 4: Set "correct" = that chosen letter.
+  VERIFY before finalizing: options[0] → A, options[1] → B, options[2] → C, options[3] → D.
+  The item at position "correct" MUST be the right answer. Never assign "correct" after writing options without double-checking.
 - CRITICAL — correct answer distribution: spread correct answers across A, B, C, D roughly evenly
   (approximately 5 A, 5 B, 5 C, 5 D across 20 questions — NOT all A or mostly A)
   Place the correct answer in a DIFFERENT position for each question; vary it deliberately.
@@ -874,6 +881,13 @@ DIFFICULTY RULES (Post Dragon Maths 3):
 - Word problems: require 2–3 steps; set in NZ contexts
 - Wrong options: reflect real student errors (wrong operation, unit mistake, rounding error)
 - solution field: LaTeX for maths e.g. $\\frac{{3}}{{4}} + \\frac{{1}}{{4}} = 1$, $3 \\times \\square = 15$
+- CRITICAL — HOW TO SET THE 'correct' FIELD (follow this order every time):
+  Step 1: Calculate the mathematically correct answer first.
+  Step 2: CHOOSE which position (A, B, C, or D) you will place it in.
+  Step 3: Write the options array so the correct answer is at that CHOSEN position.
+  Step 4: Set "correct" = that chosen letter.
+  VERIFY before finalizing: options[0] → A, options[1] → B, options[2] → C, options[3] → D.
+  The item at position "correct" MUST be the mathematically right answer. Never assign "correct" after writing options without double-checking.
 - CRITICAL — correct answer distribution: spread correct answers across A, B, C, D roughly evenly
   (approximately 5 A, 5 B, 5 C, 5 D across 20 questions — NOT all A or mostly A)
   Place the correct answer in a DIFFERENT position for each question; vary it deliberately.
@@ -1546,16 +1560,37 @@ def _show_grading_screen(
             continue  # 답안 없는 문제는 채점에서 제외
         user = (answers[qid] or "").strip().upper()[:1]
         corr = _extract_correct(q)          # 정답 정규화는 헬퍼에 위임
+
+        # 선택지 텍스트로 채점 (letter → option 텍스트 변환, 더 견고한 채점)
+        opts = q.get("options", [])
+        def _letter_to_opt(letter, opts):
+            if not letter or not opts:
+                return ""
+            idx = ord(letter) - ord("A")
+            return opts[idx] if 0 <= idx < len(opts) else ""
+        user_opt = _letter_to_opt(user, opts)
+        corr_opt = _letter_to_opt(corr, opts)
+        # 텍스트 비교를 우선 — 공백/대소문자 정규화 후 비교
+        if user_opt and corr_opt:
+            is_ok = user_opt.strip().upper() == corr_opt.strip().upper()
+        else:
+            # 폴백: letter 비교
+            is_ok = bool(user) and bool(corr) and user == corr
+
         results.append({
             "q": q,
             "user": user,
             "correct": corr,
-            "is_ok": bool(user) and bool(corr) and user == corr,
+            "user_opt": user_opt,   # 학생이 고른 선택지 전체 텍스트
+            "corr_opt": corr_opt,   # 정답 선택지 전체 텍스트
+            "is_ok": is_ok,
         })
 
     total          = len(results)
     if total == 0:
         st.error("채점할 답안이 없습니다. '새 문제 풀기'를 눌러 다시 시작해주세요.")
+        if answers:
+            st.caption(f"디버그: 답안 키={list(answers.keys())[:5]}, 문제 키={[q.get('id') for q in questions[:5]]}")
         return
     score          = sum(1 for r in results if r["is_ok"])
     wrong_list     = [r for r in results if not r["is_ok"]]
@@ -1645,8 +1680,11 @@ def _show_grading_screen(
             qid     = r["q"]["id"]
             concept = r["q"].get("concept", "unknown")
 
+            # 선택지 전체 텍스트 표시 (letter만 보여주면 어떤 답인지 불분명)
+            user_display = r.get("user_opt") or r["user"]
+            corr_display = r.get("corr_opt") or r["correct"]
             with st.expander(
-                f"❌  **{qid}번** — 내 답: {r['user']} | 정답: {r['correct']} | 개념: {concept}",
+                f"❌  **{qid}번** — 내 답: {user_display} | 정답: {corr_display} | 개념: {concept}",
                 expanded=True,
             ):
                 # AI 해설 (캐시 우선)
