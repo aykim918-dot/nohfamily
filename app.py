@@ -712,7 +712,7 @@ TASK: Generate a JSON object with this EXACT structure:
       "type": "comprehension",
       "question": "Question text?",
       "options": ["A) ...", "B) ...", "C) ...", "D) ..."],
-      "correct": "A",
+      "correct": "B",
       "concept": "main_idea",
       "explanation": "One sentence explaining the correct answer, referencing the passage."
     }}
@@ -746,6 +746,9 @@ RULES:
 - Wrong options must reflect real EAL student errors (confusion between word forms, false cognates)
 - Content appropriate for 9-11 year old EAL students
 - explanation field: quote the relevant part of the passage or explain the word form rule
+- CRITICAL — correct answer distribution: spread correct answers across A, B, C, D roughly evenly
+  (approximately 5 A, 5 B, 5 C, 5 D across 20 questions — NOT all A or mostly A)
+  Place the correct answer in a DIFFERENT position for each question; vary it deliberately.
 """
     result = _call_gemini(prompt)
     # 한글 감지 시 1회 재시도: Gemini가 passage를 한국어로 생성하는 경우 방어
@@ -836,7 +839,7 @@ TASK — Generate this exact JSON (all text in English):
       "topic": "algebra",
       "question": "Full English question text.",
       "options": ["A) ...", "B) ...", "C) ...", "D) ..."],
-      "correct": "A",
+      "correct": "C",
       "concept": "find_unknown",
       "solution": "Step 1: ... Step 2: ... Answer = ...",
       "explanation": "One English sentence explaining why the answer is correct."
@@ -871,6 +874,9 @@ DIFFICULTY RULES (Post Dragon Maths 3):
 - Word problems: require 2–3 steps; set in NZ contexts
 - Wrong options: reflect real student errors (wrong operation, unit mistake, rounding error)
 - solution field: LaTeX for maths e.g. $\\frac{{3}}{{4}} + \\frac{{1}}{{4}} = 1$, $3 \\times \\square = 15$
+- CRITICAL — correct answer distribution: spread correct answers across A, B, C, D roughly evenly
+  (approximately 5 A, 5 B, 5 C, 5 D across 20 questions — NOT all A or mostly A)
+  Place the correct answer in a DIFFERENT position for each question; vary it deliberately.
 """
     return _call_gemini(prompt)
 
