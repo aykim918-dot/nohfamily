@@ -1221,49 +1221,42 @@ def run_english_quiz(student: str):
 
     # ── 문제 표시 (미제출 시) ──
     if not submitted:
-        eng_submitted_btn = False
-        with st.form(key=f"eng_form_{student}", border=False):
-            comp_qs  = [q for q in questions if q.get("type") == "comprehension"][:10]
-            vocab_qs = [q for q in questions if q.get("type") != "comprehension"][:10]
-            # 부족하면 채우기 (comp → vocab 순으로 배분, 중복 없음)
-            remaining = [q for q in questions if q not in comp_qs and q not in vocab_qs]
-            need_comp = max(0, 10 - len(comp_qs))
-            comp_qs  += remaining[:need_comp]
-            need_vocab = max(0, 10 - len(vocab_qs))
-            vocab_qs += remaining[need_comp:need_comp + need_vocab]
+        comp_qs  = [q for q in questions if q.get("type") == "comprehension"][:10]
+        vocab_qs = [q for q in questions if q.get("type") != "comprehension"][:10]
+        # 부족하면 채우기 (comp → vocab 순으로 배분, 중복 없음)
+        remaining = [q for q in questions if q not in comp_qs and q not in vocab_qs]
+        need_comp = max(0, 10 - len(comp_qs))
+        comp_qs  += remaining[:need_comp]
+        need_vocab = max(0, 10 - len(vocab_qs))
+        vocab_qs += remaining[need_comp:need_comp + need_vocab]
 
-            st.markdown("#### 📖 Part 1 — 독해 문제 (1~8번)")
-            for q in comp_qs:
-                _render_question(q, f"eng_{student}", False)
+        st.markdown("#### 📖 Part 1 — 독해 문제 (1~8번)")
+        for q in comp_qs:
+            _render_question(q, f"eng_{student}", False)
 
-            st.markdown("#### 📚 Part 2 — 어휘·단어 가족·연어 문제 (9~20번)")
-            for q in vocab_qs:
-                _render_question(q, f"eng_{student}", False)
+        st.markdown("#### 📚 Part 2 — 어휘·단어 가족·연어 문제 (9~20번)")
+        for q in vocab_qs:
+            _render_question(q, f"eng_{student}", False)
 
-            eng_submitted_btn = st.form_submit_button(
-                "✅ 제출하고 채점받기", type="primary", use_container_width=True
-            )
-            if eng_submitted_btn:
-                rendered_qs = comp_qs + vocab_qs
-                # 폼 제출 후 세션 스테이트에서 깔끔하게 답안 수집 (단일 경로)
-                collected = _collect_answers(rendered_qs, f"eng_{student}")
-                missing = [q.get("id", "?") for q in rendered_qs if q.get("id") not in collected]
-                if missing:
-                    # session_state에 저장 → form 바깥에서 표시 (rerun 후에도 유지)
-                    st.session_state[missing_key] = missing
-                else:
-                    st.session_state.pop(missing_key, None)   # 이전 경고 제거
-                    st.session_state[ans_key]      = collected
-                    st.session_state[rendered_key] = [q.get("id") for q in rendered_qs]
-                    st.session_state[done_key]     = True
-                    # 공유 스토어에도 백업 (session_state 유실 / 탭 새로고침 대비)
-                    _get_shared_store()[f"eng_pending_{student}"] = {
-                        "data":         st.session_state[data_key],
-                        "answers":      collected,
-                        "rendered_ids": [q.get("id") for q in rendered_qs],
-                    }
-        # form 블록 바깥에서 rerun — form context manager가 RerunException을 삼키는 문제 방지
-        if eng_submitted_btn:
+        # st.form 대신 일반 버튼 사용 — form context manager가 session_state를
+        # 불안정하게 만드는 문제(채점 미전환 버그)를 근본적으로 차단
+        if st.button("✅ 제출하고 채점받기", type="primary",
+                     use_container_width=True, key=f"eng_submit_{student}"):
+            rendered_qs = comp_qs + vocab_qs
+            collected = _collect_answers(rendered_qs, f"eng_{student}")
+            missing = [q.get("id", "?") for q in rendered_qs if q.get("id") not in collected]
+            if missing:
+                st.session_state[missing_key] = missing
+            else:
+                st.session_state.pop(missing_key, None)
+                st.session_state[ans_key]      = collected
+                st.session_state[rendered_key] = [q.get("id") for q in rendered_qs]
+                st.session_state[done_key]     = True
+                _get_shared_store()[f"eng_pending_{student}"] = {
+                    "data":         st.session_state[data_key],
+                    "answers":      collected,
+                    "rendered_ids": [q.get("id") for q in rendered_qs],
+                }
             st.rerun()
 
     # (채점 화면은 함수 상단 '채점 모드 선 확인' 블록에서 처리됩니다)
