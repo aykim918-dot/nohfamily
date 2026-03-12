@@ -2,6 +2,7 @@
 삼둥이 AI 학습앱 — 퀴즈 플로우 테스트 에이전트
 =====================================================
 영어/수학 퀴즈의 제출→채점 흐름을 Streamlit 없이 시뮬레이션합니다.
+파일 기반 퍼시스턴스(hot-reload 대응) 로직도 검증합니다.
 문제가 발견되면 명확한 설명과 함께 출력합니다.
 
 실행: python test_quiz_flow.py
@@ -10,8 +11,15 @@
 import re
 import sys
 import json
+import os
+import tempfile
 import random
 from copy import deepcopy
+
+# Windows 터미널 인코딩 UTF-8 강제
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
 
 
 # ──────────────────────────────────────────────────────────────
@@ -417,6 +425,117 @@ def test_shared_store_reset_cleanup():
     check("리셋 후: pending 삭제됨", pending_key not in shared_store)
     check("리셋 후: 스토어 비어있음", len(shared_store) == 0)
 
+# ──────────────────────────────────────────────────────────────
+#  테스트 9: 파일 퍼시스턴스 — 저장/로드/삭제
+# ──────────────────────────────────────────────────────────────
+def test_file_persistence():
+    print("\n[테스트 9] 파일 퍼시스턴스 (hot-reload 대응)")
+    # 임시 파일 사용
+    tmp = tempfile.NamedTemporaryFile(suffix=".json", delete=False, mode="w", encoding="utf-8")
+    tmp.write("{}")
+    tmp.close()
+    persist_file = tmp.name
+
+    def _file_load_all():
+        try:
+            if os.path.exists(persist_file):
+                with open(persist_file, encoding="utf-8") as f:
+                    return json.load(f)
+        except Exception:
+            pass
+        return {}
+
+    def _file_save_pending(key, value):
+        try:
+            state = _file_load_all()
+            state[key] = value
+            with open(persist_file, "w", encoding="utf-8") as f:
+                json.dump(state, f, ensure_ascii=False, default=str)
+        except Exception:
+            pass
+
+    def _file_delete_pending(key):
+        try:
+            state = _file_load_all()
+            if key in state:
+                state.pop(key)
+                with open(persist_file, "w", encoding="utf-8") as f:
+                    json.dump(state, f, ensure_ascii=False, default=str)
+        except Exception:
+            pass
+
+    try:
+        # 저장 테스트
+        _file_save_pending("eng_pending_Siwan", {"data": {"q": 1}, "answers": {1: "A"}})
+        loaded = _file_load_all()
+        check("파일 저장 후 로드 가능", "eng_pending_Siwan" in loaded)
+        check("파일 저장 데이터 정확성", loaded.get("eng_pending_Siwan", {}).get("answers", {}).get("1") == "A",
+              f"실제: {loaded.get('eng_pending_Siwan', {})}")
+
+        # 두 번째 키 저장 (기존 키 덮어쓰지 않음)
+        _file_save_pending("math_pending_Siho", {"data": {}, "answers": {}, "plan": {}})
+        loaded = _file_load_all()
+        check("두 키 동시 존재", "eng_pending_Siwan" in loaded and "math_pending_Siho" in loaded,
+              f"키 목록: {list(loaded.keys())}")
+
+        # 삭제 테스트
+        _file_delete_pending("eng_pending_Siwan")
+        loaded = _file_load_all()
+        check("파일 삭제 후 키 없음", "eng_pending_Siwan" not in loaded)
+        check("다른 키 유지됨", "math_pending_Siho" in loaded)
+
+        # hot-reload 시나리오: 서버 재시작 후 파일에서 복구
+        # 새 메모리 스토어 생성 + 파일에서 로드
+        new_store = {"points": {}, "study_records": {}, "math_mastery": {}}
+        for k, v in _file_load_all().items():
+            new_store[k] = v
+        check("hot-reload 후 스토어 복구됨", "math_pending_Siho" in new_store,
+              f"스토어 키: {list(new_store.keys())}")
+
+    finally:
+        os.unlink(persist_file)
+
+
+# ──────────────────────────────────────────────────────────────
+#  테스트 10: option-text 비교 채점 (AI 레이블 불일치 대응)
+# ──────────────────────────────────────────────────────────────
+def test_option_text_grading():
+    print("\n[테스트 10] option-text 비교 채점 (AI correct 레이블 불일치 대응)")
+
+    def _letter_to_opt(letter, opts):
+        if not letter or not opts:
+            return ""
+        idx = ord(letter) - ord("A")
+        return opts[idx] if 0 <= idx < len(opts) else ""
+
+    def grade(user_letter, corr_letter, opts):
+        user_opt = _letter_to_opt(user_letter, opts)
+        corr_opt = _letter_to_opt(corr_letter, opts)
+        if user_opt and corr_opt:
+            return user_opt.strip().upper() == corr_opt.strip().upper()
+        return bool(user_letter) and bool(corr_letter) and user_letter == corr_letter
+
+    opts = ["12", "24", "36", "48"]
+
+    # 정상: 정답=A, 선택=A → 정답
+    check("정상: 정답A=선택A → 정답", grade("A", "A", opts))
+    # 정상: 정답=A, 선택=B → 오답
+    check("정상: 정답A=선택B → 오답", not grade("B", "A", opts))
+
+    # AI 불일치 시나리오: correct="C"라고 했지만 실제 정답 텍스트는 options[0]("12")에 있는 경우
+    # AI가 options=[24,12,36,48]로 잘못 배치한 케이스 → 텍스트 비교라면 같은 값이면 정답
+    opts_mismatch = ["24", "12", "36", "48"]  # 올바른 답 "12"가 B 위치
+    # correct="A"(24)지만 user는 "B"(12)를 선택 — 실제 정답은 "12"
+    # 텍스트 비교: user_opt="12", corr_opt="24" → 오답 (올바른 판정)
+    check("텍스트비교: 선택B(12) vs AI정답A(24) → 오답", not grade("B", "A", opts_mismatch))
+    # AI가 correct="B"로 제대로 설정한 경우: user=B(12) vs correct=B(12) → 정답
+    check("텍스트비교: 선택B(12) vs 정답B(12) → 정답", grade("B", "B", opts_mismatch))
+
+    # 빈 옵션 폴백
+    check("빈 opts 폴백: 레터 비교", grade("A", "A", []))
+    check("빈 opts 폴백: 오답", not grade("A", "B", []))
+
+
 if __name__ == "__main__":
     print("=" * 60)
     print("  삼둥이 AI 학습앱 퀴즈 플로우 테스트")
@@ -430,6 +549,8 @@ if __name__ == "__main__":
     test_reset_cleanup()
     test_shared_store_restore()
     test_shared_store_reset_cleanup()
+    test_file_persistence()
+    test_option_text_grading()
 
     print("\n" + "=" * 60)
     passed = sum(1 for r in results if r[0] == PASS)

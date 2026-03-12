@@ -13,6 +13,7 @@ import json
 import re
 import random
 import calendar
+import os
 from datetime import date, datetime
 
 try:
@@ -498,17 +499,60 @@ def _call_gemini_text(prompt: str) -> str:
         return ""
 
 # ============================================================
+#  파일 기반 영구 저장 — 서버 재시작(hot-reload) 후에도 퀴즈 상태 복구
+#  문제: Streamlit hot-reload 시 @st.cache_resource + session_state 모두 초기화됨
+#  해결: 제출된 답안을 로컬 JSON 파일에 저장 → 재시작 후 자동 복구
+# ============================================================
+_PERSIST_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".quiz_pending_state.json")
+
+def _file_load_all() -> dict:
+    """JSON 파일에서 모든 pending 상태 로드."""
+    try:
+        if os.path.exists(_PERSIST_FILE):
+            with open(_PERSIST_FILE, encoding="utf-8") as f:
+                return json.load(f)
+    except Exception:
+        pass
+    return {}
+
+def _file_save_pending(key: str, value: dict):
+    """Pending 퀴즈 상태를 JSON 파일에 저장 (서버 재시작 후 복구용)."""
+    try:
+        state = _file_load_all()
+        state[key] = value
+        with open(_PERSIST_FILE, "w", encoding="utf-8") as f:
+            json.dump(state, f, ensure_ascii=False, default=str)
+    except Exception:
+        pass
+
+def _file_delete_pending(key: str):
+    """JSON 파일에서 특정 pending 상태 삭제 (리셋 시 호출)."""
+    try:
+        state = _file_load_all()
+        if key in state:
+            state.pop(key)
+            with open(_PERSIST_FILE, "w", encoding="utf-8") as f:
+                json.dump(state, f, ensure_ascii=False, default=str)
+    except Exception:
+        pass
+
+# ============================================================
 #  공유 스토어 — 세션(탭) 간 데이터 지속
 #  st.cache_resource: 서버가 살아있는 동안 모든 세션이 공유
 # ============================================================
 @st.cache_resource
 def _get_shared_store() -> dict:
-    """탭/창을 새로 열어도 점수·기록이 유지되는 서버 공유 스토어"""
-    return {
+    """탭/창을 새로 열어도 점수·기록이 유지되는 서버 공유 스토어.
+    서버 재시작 시 파일에서 pending 퀴즈 상태 자동 복구."""
+    store = {
         "points":        {"Siwan": 0, "Siwon": 0, "Siho": 0},
         "study_records": {},
         "math_mastery":  {"Siwan": {}, "Siwon": {}, "Siho": {}},
     }
+    # 서버 재시작 후 파일에서 pending 상태 복구 (hot-reload 대응)
+    for k, v in _file_load_all().items():
+        store[k] = v
+    return store
 
 def _sync_from_store():
     """공유 스토어 → session_state 동기화 (세션 최초 방문 시)"""
@@ -1121,6 +1165,7 @@ def run_english_quiz(student: str):
                           f"record_done_{expl_key}", f"ai_feedback_{expl_key}"]:
                     st.session_state.pop(k, None)
                 _get_shared_store().pop(f"eng_pending_{student}", None)
+                _file_delete_pending(f"eng_pending_{student}")   # 파일에서도 삭제
                 for k in list(st.session_state.keys()):
                     if k.startswith(f"radio_eng_{student}_"):
                         del st.session_state[k]
@@ -1272,11 +1317,14 @@ def run_english_quiz(student: str):
                 st.session_state[ans_key]      = collected
                 st.session_state[rendered_key] = [q.get("id") for q in rendered_qs]
                 st.session_state[done_key]     = True
-                _get_shared_store()[f"eng_pending_{student}"] = {
+                _pending = {
                     "data":         st.session_state[data_key],
                     "answers":      collected,
                     "rendered_ids": [q.get("id") for q in rendered_qs],
                 }
+                _get_shared_store()[f"eng_pending_{student}"] = _pending
+                # 파일에도 저장 → 서버 재시작(hot-reload) 후에도 채점 화면 복구
+                _file_save_pending(f"eng_pending_{student}", _pending)
             st.rerun()
 
     # (채점 화면은 함수 상단 '채점 모드 선 확인' 블록에서 처리됩니다)
@@ -1365,6 +1413,7 @@ def run_math_quiz(student: str):
                           f"ai_feedback_{expl_key}"]:
                     st.session_state.pop(k, None)
                 _get_shared_store().pop(f"math_pending_{student}", None)
+                _file_delete_pending(f"math_pending_{student}")   # 파일에서도 삭제
                 for k in list(st.session_state.keys()):
                     if k.startswith(f"radio_math_{student}_"):
                         del st.session_state[k]
@@ -1475,11 +1524,14 @@ def run_math_quiz(student: str):
                 st.session_state.pop(missing_key, None)
                 st.session_state[ans_key]  = collected
                 st.session_state[done_key] = True
-                _get_shared_store()[f"math_pending_{student}"] = {
+                _pending = {
                     "data":    st.session_state[data_key],
                     "answers": collected,
                     "plan":    st.session_state.get(plan_key, learning_plan),
                 }
+                _get_shared_store()[f"math_pending_{student}"] = _pending
+                # 파일에도 저장 → 서버 재시작(hot-reload) 후에도 채점 화면 복구
+                _file_save_pending(f"math_pending_{student}", _pending)
             st.rerun()
 
     # ── 미답 문제 경고 (form 바깥에서 표시 — rerun 후에도 유지됨) ──
