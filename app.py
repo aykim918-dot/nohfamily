@@ -1295,13 +1295,20 @@ def run_english_quiz(student: str):
         need_vocab = max(0, 10 - len(vocab_qs))
         vocab_qs += remaining[need_comp:need_comp + need_vocab]
 
-        st.markdown("#### 📖 Part 1 — 독해 문제 (1~8번)")
+        st.markdown(f"#### 📖 Part 1 — 독해 문제 ({len(comp_qs)}문제)")
         for q in comp_qs:
             _render_question(q, f"eng_{student}", False)
 
-        st.markdown("#### 📚 Part 2 — 어휘·단어 가족·연어 문제 (9~20번)")
+        st.markdown(f"#### 📚 Part 2 — 어휘·단어 가족·연어 문제 ({len(vocab_qs)}문제)")
         for q in vocab_qs:
             _render_question(q, f"eng_{student}", False)
+
+        # 미답 경고를 버튼 바로 위에도 표시 (페이지 상단 경고를 못 봤을 경우 대비)
+        if st.session_state.get(missing_key):
+            st.error(
+                f"🚨 **{', '.join(str(m) for m in st.session_state[missing_key])}번** 문제에 아직 답하지 않았어요! "
+                "위로 스크롤해서 빠진 문제를 선택한 후 다시 제출해주세요."
+            )
 
         # st.form 대신 일반 버튼 사용 — form context manager가 session_state를
         # 불안정하게 만드는 문제(채점 미전환 버그)를 근본적으로 차단
@@ -1511,6 +1518,13 @@ def run_math_quiz(student: str):
 
         for q in questions:
             _render_question(q, f"math_{student}", False)
+
+        # 미답 경고를 버튼 바로 위에도 표시 (페이지 상단 경고를 못 봤을 경우 대비)
+        if st.session_state.get(missing_key):
+            st.error(
+                f"🚨 **{', '.join(str(m) for m in st.session_state[missing_key])}번** 문제에 아직 답하지 않았어요! "
+                "위로 스크롤해서 빠진 문제를 선택한 후 다시 제출해주세요."
+            )
 
         # st.form 대신 일반 버튼 사용 — form context manager가 session_state를
         # 불안정하게 만드는 문제(채점 미전환 버그)를 근본적으로 차단
