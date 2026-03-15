@@ -554,6 +554,17 @@ def _get_shared_store() -> dict:
         store[k] = v
     return store
 
+def _normalize_answers(raw: dict) -> dict:
+    """JSON 파일 로드 시 문자열로 변환된 정수 키를 정수로 복원.
+    {\"1\": \"A\", \"2\": \"B\"} → {1: \"A\", 2: \"B\"}"""
+    result = {}
+    for k, v in raw.items():
+        try:
+            result[int(k)] = v
+        except (ValueError, TypeError):
+            result[k] = v
+    return result
+
 def _sync_from_store():
     """공유 스토어 → session_state 동기화 (세션 최초 방문 시)"""
     if st.session_state.get("_store_synced"):
@@ -1132,8 +1143,10 @@ def run_english_quiz(student: str):
     if _eng_pending_key in _shared and not st.session_state.get(done_key, False):
         _ep = _shared[_eng_pending_key]
         st.session_state[data_key]     = _ep["data"]
-        st.session_state[ans_key]      = _ep["answers"]
-        st.session_state[rendered_key] = _ep.get("rendered_ids", [])
+        # JSON 파일 복구 시 정수 키가 문자열로 변환되므로 정수로 재정규화
+        st.session_state[ans_key]      = _normalize_answers(_ep.get("answers", {}))
+        _raw_ids = _ep.get("rendered_ids", [])
+        st.session_state[rendered_key] = [int(x) if str(x).isdigit() else x for x in _raw_ids]
         st.session_state[done_key]     = True
 
 
@@ -1390,7 +1403,8 @@ def run_math_quiz(student: str):
     if _math_pending_key in _shared and not st.session_state.get(done_key, False):
         _mp = _shared[_math_pending_key]
         st.session_state[data_key] = _mp["data"]
-        st.session_state[ans_key]  = _mp["answers"]
+        # JSON 파일 복구 시 정수 키가 문자열로 변환되므로 정수로 재정규화
+        st.session_state[ans_key]  = _normalize_answers(_mp.get("answers", {}))
         st.session_state[plan_key] = _mp["plan"]
         st.session_state[done_key] = True
 
@@ -1619,6 +1633,8 @@ def _show_grading_screen(
                   else f"level_{learning_plan_or_diff.get('current_level', 1)}")
 
     # ── 1. 채점 계산 (실제 출제된 문제만 — AI가 초과 생성해도 미출제 문제는 제외) ──
+    # JSON 파일 복구 경로에서 정수 키가 문자열로 변환될 수 있으므로 정규화
+    answers = _normalize_answers(answers)
     results = []
     for q in questions:
         qid = q.get("id")

@@ -536,6 +536,65 @@ def test_option_text_grading():
     check("빈 opts 폴백: 오답", not grade("A", "B", []))
 
 
+# ──────────────────────────────────────────────────────────────
+#  테스트 11: JSON 정수 키 정규화 (_normalize_answers)
+# ──────────────────────────────────────────────────────────────
+def _normalize_answers(raw: dict) -> dict:
+    """테스트용 인라인 복제 — app.py의 _normalize_answers와 동일 로직."""
+    result = {}
+    for k, v in raw.items():
+        try:
+            result[int(k)] = v
+        except (ValueError, TypeError):
+            result[k] = v
+    return result
+
+
+def test_json_int_key_normalization():
+    print("\n[테스트 11] JSON 정수 키 정규화 (hot-reload 후 채점 실패 방어)")
+
+    # JSON 직렬화/역직렬화 시뮬레이션
+    original = {1: "A", 2: "B", 3: "C", 20: "D"}
+    serialized = json.dumps(original)           # {"1": "A", "2": "B", ...}
+    deserialized = json.loads(serialized)       # {"1": "A", "2": "B", ...} — 키가 문자열로 변환됨
+
+    check("JSON 역직렬화 후 키가 문자열임 (정상)",
+          all(isinstance(k, str) for k in deserialized.keys()),
+          f"키 타입: {[type(k).__name__ for k in deserialized.keys()]}")
+
+    normalized = _normalize_answers(deserialized)
+    check("정규화 후 키가 정수임",
+          all(isinstance(k, int) for k in normalized.keys()),
+          f"키 타입: {[type(k).__name__ for k in normalized.keys()]}")
+
+    check("정규화 후 값 보존됨", normalized == original,
+          f"원본: {original}, 정규화: {normalized}")
+
+    # 채점 시뮬레이션: 정수 qid로 문자열 키 answers 조회
+    questions = [{"id": i+1, "options": ["opt_A", "opt_B", "opt_C", "opt_D"], "correct": "A"}
+                 for i in range(20)]
+    string_keyed_answers = {str(i+1): "A" for i in range(20)}  # 파일에서 복구된 상태
+
+    # 정규화 전: 채점 실패
+    results_before = []
+    for q in questions:
+        qid = q.get("id")  # 정수
+        if qid in string_keyed_answers:  # 정수 in 문자열 키 dict → False
+            results_before.append(qid)
+    check("정규화 전: 채점 매칭 0개 (버그 재현)", len(results_before) == 0,
+          f"매칭됨: {len(results_before)}개")
+
+    # 정규화 후: 채점 성공
+    normalized_answers = _normalize_answers(string_keyed_answers)
+    results_after = []
+    for q in questions:
+        qid = q.get("id")
+        if qid in normalized_answers:
+            results_after.append(qid)
+    check("정규화 후: 채점 매칭 20개 (수정 검증)", len(results_after) == 20,
+          f"매칭됨: {len(results_after)}개")
+
+
 if __name__ == "__main__":
     print("=" * 60)
     print("  삼둥이 AI 학습앱 퀴즈 플로우 테스트")
@@ -551,6 +610,7 @@ if __name__ == "__main__":
     test_shared_store_reset_cleanup()
     test_file_persistence()
     test_option_text_grading()
+    test_json_int_key_normalization()
 
     print("\n" + "=" * 60)
     passed = sum(1 for r in results if r[0] == PASS)
