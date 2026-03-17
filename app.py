@@ -1142,12 +1142,15 @@ def run_english_quiz(student: str):
     _shared = _get_shared_store()
     if _eng_pending_key in _shared and not st.session_state.get(done_key, False):
         _ep = _shared[_eng_pending_key]
-        st.session_state[data_key]     = _ep["data"]
-        # JSON 파일 복구 시 정수 키가 문자열로 변환되므로 정수로 재정규화
-        st.session_state[ans_key]      = _normalize_answers(_ep.get("answers", {}))
-        _raw_ids = _ep.get("rendered_ids", [])
-        st.session_state[rendered_key] = [int(x) if str(x).isdigit() else x for x in _raw_ids]
-        st.session_state[done_key]     = True
+        try:
+            st.session_state[data_key]     = _ep.get("data", {})
+            # JSON 파일 복구 시 정수 키가 문자열로 변환되므로 정수로 재정규화
+            st.session_state[ans_key]      = _normalize_answers(_ep.get("answers", {}))
+            _raw_ids = _ep.get("rendered_ids", [])
+            st.session_state[rendered_key] = [int(x) if str(x).isdigit() else x for x in _raw_ids]
+            st.session_state[done_key]     = True
+        except Exception:
+            _get_shared_store().pop(_eng_pending_key, None)
 
 
     # ── 채점 모드 선 확인 (init 블록보다 먼저 — init이 done_key를 덮어쓰기 전에 처리) ──
@@ -1185,9 +1188,14 @@ def run_english_quiz(student: str):
                 st.rerun()
             return  # 채점 화면만 표시, 아래 퀴즈 폼은 렌더링하지 않음
         else:
-            # data_key 유실 (세션 만료) → done_key 초기화 후 새 문제 생성 진행
+            # data_key 유실 (세션/서버 재시작) → 자동 생성 대신 사용자에게 선택권 제공
             st.session_state.pop(done_key, None)
-            st.warning("⚠️ 세션 데이터가 만료되었습니다. 새 문제를 준비합니다...")
+            _get_shared_store().pop(_eng_pending_key, None)
+            _file_delete_pending(_eng_pending_key)
+            st.warning("⚠️ 채점 데이터가 만료되었습니다 (서버 재시작 또는 오랜 미사용). 새 문제를 시작해주세요.")
+            if st.button("📝 새 문제 시작하기", use_container_width=True, key=f"eng_expired_{student}"):
+                st.rerun()
+            return
 
     if data_key not in st.session_state:
         with st.spinner("🤖 AI가 맞춤 문제를 만들고 있어요... (약 30초 소요)"):
@@ -1402,11 +1410,14 @@ def run_math_quiz(student: str):
     _shared = _get_shared_store()
     if _math_pending_key in _shared and not st.session_state.get(done_key, False):
         _mp = _shared[_math_pending_key]
-        st.session_state[data_key] = _mp["data"]
-        # JSON 파일 복구 시 정수 키가 문자열로 변환되므로 정수로 재정규화
-        st.session_state[ans_key]  = _normalize_answers(_mp.get("answers", {}))
-        st.session_state[plan_key] = _mp["plan"]
-        st.session_state[done_key] = True
+        try:
+            st.session_state[data_key] = _mp.get("data", {})
+            # JSON 파일 복구 시 정수 키가 문자열로 변환되므로 정수로 재정규화
+            st.session_state[ans_key]  = _normalize_answers(_mp.get("answers", {}))
+            st.session_state[plan_key] = _mp.get("plan", learning_plan)
+            st.session_state[done_key] = True
+        except Exception:
+            _get_shared_store().pop(_math_pending_key, None)
 
 
     # ── 채점 모드 선 확인 (init 블록보다 먼저 — init이 done_key를 덮어쓰기 전에 처리) ──
@@ -1441,9 +1452,14 @@ def run_math_quiz(student: str):
                 st.rerun()
             return  # 채점 화면만 표시, 아래 퀴즈 폼은 렌더링하지 않음
         else:
-            # data_key 유실 (세션 만료) → done_key 초기화 후 새 문제 생성 진행
+            # data_key 유실 (세션/서버 재시작) → 자동 생성 대신 사용자에게 선택권 제공
             st.session_state.pop(done_key, None)
-            st.warning("⚠️ 세션 데이터가 만료되었습니다. 새 문제를 준비합니다...")
+            _get_shared_store().pop(_math_pending_key, None)
+            _file_delete_pending(_math_pending_key)
+            st.warning("⚠️ 채점 데이터가 만료되었습니다 (서버 재시작 또는 오랜 미사용). 새 문제를 시작해주세요.")
+            if st.button("📝 새 문제 시작하기", use_container_width=True, key=f"math_expired_{student}"):
+                st.rerun()
+            return
 
     if data_key not in st.session_state:
         with st.spinner("🤖 AI가 오늘의 학습 내용과 문제를 준비하고 있어요... (약 30초 소요)"):
