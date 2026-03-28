@@ -947,7 +947,11 @@ DIFFICULTY RULES (Post Dragon Maths 3):
   (approximately 5 A, 5 B, 5 C, 5 D across 20 questions — NOT all A or mostly A)
   Place the correct answer in a DIFFERENT position for each question; vary it deliberately.
 """
-    return _call_gemini(prompt)
+    result = _call_gemini(prompt)
+    # API 응답 실패 또는 questions 키 누락 시 1회 재시도
+    if not result or "questions" not in result:
+        result = _call_gemini(prompt)
+    return result
 
 # ============================================================
 #  AI 개인화 해설 생성 (핵심 신규 함수)
@@ -1465,7 +1469,9 @@ def run_math_quiz(student: str):
         with st.spinner("🤖 AI가 오늘의 학습 내용과 문제를 준비하고 있어요... (약 30초 소요)"):
             data = generate_math_questions(student, learning_plan, wrong_concepts)
         if not data or "questions" not in data:
-            st.error("문제 생성에 실패했습니다. API 키와 인터넷 연결을 확인해주세요.")
+            st.error("문제 생성에 실패했습니다. 잠시 후 다시 시도해주세요.")
+            if st.button("🔄 다시 시도", use_container_width=True, key=f"math_retry_{student}"):
+                st.rerun()
             return
         # 문제 ID 정규화: AI 생성 ID 중복·누락이어도 1~N 순번 보장 (라디오 키 충돌 방지)
         for i, q in enumerate(data["questions"]):
