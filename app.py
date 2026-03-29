@@ -594,6 +594,30 @@ def _push_to_store_mastery(student: str):
         st.session_state.math_mastery.get(student, {})
     )
 
+def reset_quiz_state():
+    """퀴즈 진행·채점 상태만 초기화 (점수·기록은 유지). 화면이 멈췄을 때 사용."""
+    store = _get_shared_store()
+    # shared store의 pending 상태 제거
+    for s in STUDENTS:
+        store.pop(f"eng_pending_{s}", None)
+        store.pop(f"math_pending_{s}", None)
+    # 파일 기반 pending 상태 제거
+    try:
+        if os.path.exists(_PERSIST_FILE):
+            os.remove(_PERSIST_FILE)
+    except Exception:
+        pass
+    # session_state의 퀴즈 관련 키 모두 제거
+    _quiz_prefixes = (
+        "eng_data_", "eng_ans_", "eng_done_", "eng_missing_", "eng_rendered_",
+        "math_data_", "math_ans_", "math_done_", "math_missing_", "math_plan_",
+        "explanations_", "record_done_", "mastery_done_", "ai_feedback_",
+        "radio_eng_", "radio_math_", "_staged_rendered_",
+    )
+    for k in list(st.session_state.keys()):
+        if any(k.startswith(p) for p in _quiz_prefixes):
+            st.session_state.pop(k, None)
+
 def reset_all_scores():
     """전체 점수·기록·마스터리 초기화 (공유 스토어 + 현재 세션)"""
     store = _get_shared_store()
@@ -605,6 +629,8 @@ def reset_all_scores():
     st.session_state.study_records = {}
     st.session_state.math_mastery  = {"Siwan": {}, "Siwon": {}, "Siho": {}}
     st.session_state._store_synced = True
+    # 퀴즈 진행 상태도 함께 초기화
+    reset_quiz_state()
 
 # ============================================================
 #  수학 마스터리 추적 함수
@@ -1335,29 +1361,35 @@ def run_english_quiz(student: str):
                 "위로 스크롤해서 빠진 문제를 선택한 후 다시 제출해주세요."
             )
 
-        # st.form 대신 일반 버튼 사용 — form context manager가 session_state를
-        # 불안정하게 만드는 문제(채점 미전환 버그)를 근본적으로 차단
-        if st.button("✅ 제출하고 채점받기", type="primary",
-                     use_container_width=True, key=f"eng_submit_{student}"):
-            rendered_qs = comp_qs + vocab_qs
-            collected = _collect_answers(rendered_qs, f"eng_{student}")
-            missing = [q.get("id", "?") for q in rendered_qs if q.get("id") not in collected]
-            if missing:
-                st.session_state[missing_key] = missing
+        _staged_key = f"_staged_rendered_{student}"
+        st.session_state[_staged_key] = comp_qs + vocab_qs
+
+        def _on_eng_submit():
+            _rendered = st.session_state.get(f"_staged_rendered_{student}", [])
+            _collected = _collect_answers(_rendered, f"eng_{student}")
+            _missing = [q.get("id", "?") for q in _rendered if q.get("id") not in _collected]
+            if _missing:
+                st.session_state[missing_key] = _missing
             else:
                 st.session_state.pop(missing_key, None)
-                st.session_state[ans_key]      = collected
-                st.session_state[rendered_key] = [q.get("id") for q in rendered_qs]
+                st.session_state[ans_key]      = _collected
+                st.session_state[rendered_key] = [q.get("id") for q in _rendered]
                 st.session_state[done_key]     = True
                 _pending = {
                     "data":         st.session_state[data_key],
-                    "answers":      collected,
-                    "rendered_ids": [q.get("id") for q in rendered_qs],
+                    "answers":      _collected,
+                    "rendered_ids": [q.get("id") for q in _rendered],
                 }
                 _get_shared_store()[f"eng_pending_{student}"] = _pending
-                # 파일에도 저장 → 서버 재시작(hot-reload) 후에도 채점 화면 복구
                 _file_save_pending(f"eng_pending_{student}", _pending)
-            st.rerun()
+
+        st.button(
+            "✅ 제출하고 채점받기",
+            type="primary",
+            use_container_width=True,
+            key=f"eng_submit_{student}",
+            on_click=_on_eng_submit,
+        )
 
     # (채점 화면은 함수 상단 '채점 모드 선 확인' 블록에서 처리됩니다)
 
@@ -1562,27 +1594,32 @@ def run_math_quiz(student: str):
                 "위로 스크롤해서 빠진 문제를 선택한 후 다시 제출해주세요."
             )
 
-        # st.form 대신 일반 버튼 사용 — form context manager가 session_state를
-        # 불안정하게 만드는 문제(채점 미전환 버그)를 근본적으로 차단
-        if st.button("✅ 제출하고 채점받기", type="primary",
-                     use_container_width=True, key=f"math_submit_{student}"):
-            collected = _collect_answers(questions, f"math_{student}")
-            missing = [q.get("id", "?") for q in questions if q.get("id") not in collected]
-            if missing:
-                st.session_state[missing_key] = missing
+        def _on_math_submit():
+            _data_now = st.session_state.get(data_key, {})
+            _qs = _data_now.get("questions", [])
+            _collected = _collect_answers(_qs, f"math_{student}")
+            _missing = [q.get("id", "?") for q in _qs if q.get("id") not in _collected]
+            if _missing:
+                st.session_state[missing_key] = _missing
             else:
                 st.session_state.pop(missing_key, None)
-                st.session_state[ans_key]  = collected
+                st.session_state[ans_key]  = _collected
                 st.session_state[done_key] = True
                 _pending = {
                     "data":    st.session_state[data_key],
-                    "answers": collected,
+                    "answers": _collected,
                     "plan":    st.session_state.get(plan_key, learning_plan),
                 }
                 _get_shared_store()[f"math_pending_{student}"] = _pending
-                # 파일에도 저장 → 서버 재시작(hot-reload) 후에도 채점 화면 복구
                 _file_save_pending(f"math_pending_{student}", _pending)
-            st.rerun()
+
+        st.button(
+            "✅ 제출하고 채점받기",
+            type="primary",
+            use_container_width=True,
+            key=f"math_submit_{student}",
+            on_click=_on_math_submit,
+        )
 
     # ── 미답 문제 경고 (form 바깥에서 표시 — rerun 후에도 유지됨) ──
     if st.session_state.get(missing_key):
@@ -2198,6 +2235,13 @@ def main():
 
         st.markdown("---")
         with st.expander("⚙️ 관리자"):
+            # 퀴즈 화면이 멈췄을 때 — 점수 유지, 화면만 초기화
+            if st.button("🔃 퀴즈 화면 초기화", use_container_width=True, key="reset_quiz_state"):
+                reset_quiz_state()
+                st.success("✅ 퀴즈 화면 초기화 완료! 새 문제를 시작할 수 있어요.")
+                st.rerun()
+            st.caption("화면이 멈추거나 채점 화면에서 나올 수 없을 때 사용 (점수 유지)")
+            st.markdown("---")
             st.caption("점수·기록·마스터리를 모두 0으로 초기화합니다.")
             confirm = st.checkbox("정말 초기화할까요? ✅", key="reset_confirm")
             if confirm:
